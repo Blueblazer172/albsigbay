@@ -1,0 +1,63 @@
+body {
+    font-family: Arial, serif;
+}
+.container {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.navbar {
+    display: grid;
+    align-items: center;
+    justify-content: space-around;
+    grid-template-columns: repeat(8, 1fr);
+
+    background-color: #a6a6a6;
+    padding: 1rem;
+    font-size: 2rem;
+}
+
+.item {
+    height: 50px;
+}
+
+.logo {
+    grid-column: 1;
+}
+
+.logoname {
+    grid-column: 2;
+}
+
+.home {
+    grid-column: 3;
+}
+
+.about {
+    grid-column: 4;
+}
+
+.faq {
+    grid-column-start: 5;
+    grid-column-end: 7;
+}
+
+.login {
+    grid-column: 8;
+
+}
+
+.welcome {
+    padding: 2rem;
+}
+
+.white-text {
+    color: white;
+}
+
+.is-active {
+    background-color: #979797;
+}
+
