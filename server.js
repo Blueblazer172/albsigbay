@@ -9,8 +9,32 @@ app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname + '/index.html'));
 });
 
-app.get('/bt', function(req, res) {
-    res.sendFile(path.join(__dirname + '/index2.html'));
+app.get('/about', function(req, res) {
+    res.sendFile(path.join(__dirname + '/about.html'));
+});
+
+app.get('/faq', function(req, res) {
+    res.sendFile(path.join(__dirname + '/faq.html'));
+});
+
+app.get('/login', function(req, res) {
+    res.sendFile(path.join(__dirname + '/login.html'));
+});
+
+app.get('/gdpr', function(req, res) {
+    res.sendFile(path.join(__dirname + '/gdpr.html'));
+});
+
+app.post('/login', function(req, res) {
+    //@TODO handle post login
+});
+
+app.get('/register', function(req, res) {
+    res.sendFile(path.join(__dirname + '/register.html'));
+});
+
+app.post('/register', function(req, res) {
+    //@TODO handle post register
 });
 
 app.listen(port, () => {
