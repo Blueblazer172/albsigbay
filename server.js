@@ -37,6 +37,10 @@ app.post('/register', function(req, res) {
     //@TODO handle post register
 });
 
+app.get('/proto', function(req, res) {
+    res.sendFile(path.join(__dirname + '/plain-html-prototype/index.html'));
+});
+
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
