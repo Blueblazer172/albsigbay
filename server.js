@@ -37,6 +37,8 @@ app.post('/register', function(req, res) {
     //@TODO handle post register
 });
 
+app.use(express.static(__dirname + '/plain-html-prototype'));
+
 app.get('/proto', function(req, res) {
     res.sendFile(path.join(__dirname + '/plain-html-prototype/index.html'));
 });
