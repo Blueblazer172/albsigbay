@@ -53,7 +53,7 @@ let db = new sqlite3.Database(DB_NAME, (err) => {
                 borrowedDate text,
                 returnDate   text,
                 FOREIGN KEY (bookId) REFERENCES books (bookId)
-                    FOREIGN KEY (userId) REFERENCES users(userId)
+                FOREIGN KEY (userId) REFERENCES users(userId)
             )`, (err) => {
             if (err) console.log('Already created borrowedBooks Table');
         });

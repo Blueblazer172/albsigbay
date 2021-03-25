@@ -9,38 +9,7 @@
     <link rel="stylesheet" type="text/css" href="style.css"/>
 </head>
 <body>
-<nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-            <img width="auto" height="50px" class="d-inline-block align-top" src="logo.png" alt="Logo AlbsigBay">
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar"
-                aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbar">
-            <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <li class="nav-item">
-                    <span class="nav-link h1">AlbsigBay</span>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link h1" href="/">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link h1" href="/about">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link h1" href="/faq">FAQ</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link active h1" href="/login">Login</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+<%- include('../components/nav', {page: 'login'}) %>
 <main class="container">
     <div class="mt-3">
         <h1 class="display-1">Login</h1>

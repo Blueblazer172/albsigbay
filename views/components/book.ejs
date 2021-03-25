@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AlbsigBay - Book</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+<%- include('nav', {page: 'home'}); %>
+<main class="container">
+    <div class="row mt-3 mb-3">
+        <div class="col col-xs-12">
+            <% if (data) { %>
+                <h1 class="display-4"><%= data.title %></h1>
+                <h1 class="h2"><%= data.isbn %></h1>
+                <img src="/public/books/covers/<%= data.cover %>" alt="<%= data.title %>" width="380px" height="auto">
+                <p class="lead mt-4"><%= data.description %></p>
+                <p class="lead mt-4">
+                    <strong>Autor(en): </strong><%= data.author %>,
+                    <strong>Herausgegeben von: </strong><%= data.vendor %>,
+                    <strong>Auflage: </strong><%= data.publicationDate %>,
+                    <strong>Seiten: </strong><%= data.pages %>,
+                    <strong>Kategorie: </strong><%= data.category.toUpperCase() %>
+                </p>
+                <button class="btn btn-primary">Buch Ausleihen</button>
+            <% } %>
+        </div>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
