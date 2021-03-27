@@ -1,7 +1,8 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">
-            <img width="auto" height="50px" class="d-inline-block align-top" src="/public/logo.png" alt="Logo AlbsigBay">
+            <img width="auto" height="50px" class="d-inline-block align-top" src="/public/logo.png"
+                 alt="Logo AlbsigBay">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar"
                 aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,15 +17,37 @@
                     <a class="nav-link h1 <% if(page.toLowerCase() === "home"){ %> active<% } %>" href="/">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link h1 <% if(page.toLowerCase() === "about"){ %> active<% } %>" href="/about">About</a>
+                    <a class="nav-link h1 <% if(page.toLowerCase() === "about"){ %> active<% } %>"
+                       href="/about">About</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link h1 <% if(page.toLowerCase() === "faq"){ %> active<% } %>" href="/faq">FAQ</a>
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link h1 <% if(page.toLowerCase() === "login"){ %> active<% } %>" href="/login">Login</a>
+                <% if (typeof user !== 'undefined') { %>
+                    <% if (!user) { %>
+                        <li class="nav-item">
+                            <a class="nav-link h1 <% if(page.toLowerCase() === "login"){ %> active<% } %>" href="/login">Login</a>
+                        </li>
+                    <% }else{ %>
+                        <% if (user.isAdmin) {%>
+                            <li class="nav-item">
+                                <a class="nav-link h1 <% if(page.toLowerCase() === "admin"){ %> active<% } %>" href="/admin">Admin</a>
+                            </li>
+                        <% } %>
+                        <li class="nav-item">
+                            <a class="nav-link h1 <% if(page.toLowerCase() === "profile"){ %> active<% } %>" href="/profile">Profil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link h1" href="/logout">Logout</a>
+                        </li>
+                    <% } %>
+                <% } else { %>
+                    <li class="nav-item">
+                        <a class="nav-link h1 <% if(page.toLowerCase() === "login"){ %> active<% } %>" href="/login">Login</a>
+                    </li>
+                <% } %>
                 </li>
             </ul>
         </div>

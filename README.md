@@ -10,7 +10,7 @@ cd albsigbay
 ```bash
 npm ci
 ```
-### Run
+# Run
 ```bash
 node server.js
 ```
