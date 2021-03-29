@@ -20,8 +20,7 @@
                 <h1 class="display-6">Name Ändern</h1>
                 <div class="col-md-4">
                     <label for="firstname" class="form-label">Vorname</label>
-                    <input type="text" class="form-control" value="<%= user.firstname %>" name="firstname"
-                           id="firstname">
+                    <input type="text" class="form-control" value="<%= user.firstname %>" name="firstname" id="firstname">
                 </div>
                 <div class="col-md-4">
                     <label for="name" class="form-label">Nachname</label>
@@ -29,8 +28,7 @@
                 </div>
                 <div class="col-md-2">
                     <label for="updateName" class="form-label">&nbsp;</label>
-                    <input type="submit" class="btn btn-success form-control" value="Aktualisieren" name="updateName"
-                           id="updateName">
+                    <input type="submit" class="btn btn-success form-control" value="Aktualisieren" name="updateName" id="updateName">
                 </div>
             </form>
         </div>
@@ -97,7 +95,6 @@
                     form.classList.add('was-validated')
                 }, false)
             });
-
     };
 
     document.querySelector('#deleteUserButton').addEventListener('click', (e) => {

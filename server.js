@@ -82,7 +82,6 @@ app.use((req, res, next) => {
     }
 });
 
-
 // middleware function to check for logged-in users
 let sessionChecker = (req, res, next) => {
     if (req.session.user && req.cookies.user_sid) {
@@ -375,7 +374,7 @@ app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
         author: req.body.author,
         pages: req.body.pages,
         description: req.body.description,
-        category: req.body.category,
+        category: req.body.category.toLowerCase(),
         vendor: req.body.vendor,
         publicationDate: req.body.publicationDate
     };
@@ -395,7 +394,64 @@ app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
             console.error(error.message)
         });
     });
-})
+});
+
+app.post("/profile/name/:id", (req, res, next) => {
+    User.findOne({where: {id: req.params.id}}).then((user) => {
+        if (!user) {
+            res.json({
+                "message": "failure",
+                "data": null
+            });
+        } else {
+            User.update({firstname: req.body.firstname, name: req.body.name}, {where: {id: req.params.id}})
+                .then(() => {
+                    res.redirect(`/profile/${req.params.id}`);
+                });
+        }
+    });
+});
+
+app.post("/profile/password/:id", (req, res, next) => {
+    User.findOne({where: {id: req.params.id}}).then(async (user) => {
+        if (!user) {
+            res.json({
+                "message": "failure",
+                "data": null
+            });
+        } else {
+            let errors = [];
+
+            // check old password is actually old password py comparing the hash
+            if (!user.validPassword(req.body.oldPassword)) {
+                errors.push('oldPassword is not current user password');
+            }
+
+            // check for password has changed from old password
+            if (user.validPassword(req.body.oldPassword) === user.validPassword(req.body.newPassword)) {
+                errors.push('oldPassword cannot be the new password');
+            }
+
+            // check if newPassword is reNewPassword
+            if (req.body.newPassword !== req.body.reNewPassword) {
+                errors.push('reNewPassword is not the same as newPassword');
+            }
+
+            if (errors.length) {
+                // @TODO render errors in template
+                res.status(400).json({"error": errors.join(", ")});
+                return;
+            }
+
+            // generate hash for newPassword and update password column in user table
+            let newPassword = await user.generateHash(req.body.newPassword);
+            User.update({password: newPassword}, {where: {id: req.params.id}}).then(() => {
+                // logout user after successful changed password
+                res.redirect('/logout');
+            });
+        }
+    });
+});
 
 app.get("/search", (req, res, next) => {
     res.redirect('/');

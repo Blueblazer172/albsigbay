@@ -13,7 +13,7 @@ let Book = sequelize.define('books', {
         allowNull: false
     },
     isbn: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false
     },
     author: {

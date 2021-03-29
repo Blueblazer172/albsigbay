@@ -73,6 +73,10 @@ User.prototype.validPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
 };
 
+User.prototype.generateHash = function (password) {
+    return bcrypt.hash(password, bcrypt.genSaltSync());
+}
+
 // create all the defined tables in the specified database.
 sequelize.sync()
     .then(() => console.log('users table has been successfully created, if one doesn\'t exist'))
