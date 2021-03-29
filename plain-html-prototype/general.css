@@ -45,6 +45,14 @@ nav li a {
   width: 68%;
 }
 
+.button-mehr {
+  color: white;
+  padding: 5px 8px;
+  background-color: #034f84;
+  border-radius: 3px;
+  text-decoration: none;
+}
+
 footer {
   float: left;
   width: 100%;
