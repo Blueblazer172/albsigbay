@@ -5,7 +5,14 @@
 }
 
 .line{
-    border-bottom-style: solid;
+    border-bottom: solid 1px #D4D9D5;
+}
+h1{
+    margin-top: 15px;
+    margin-bottom: 1px;
+    font-size: 30px;
+    font-weight: 400;
+    color: #373636;
 }
 
 .text{
@@ -14,16 +21,20 @@
     margin-right: 2%;
     width: 50%;
     float: left;
+    color: #373636;
 }
 
 .picture-div{
+    float: right;
     margin-top: 2%;
     margin-bottom: 2%;
-    float: left;
-    margin-left: 5%;
+    margin-right: 2%;
 }
 .picture{
-    width: 50%;
+    width: 60%;
+    float: right;
+    
+
     
 }
 .back{
