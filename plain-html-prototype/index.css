@@ -4,6 +4,15 @@
     margin-left: 15%;
 }
 
+.white {
+    background-color: white;
+    margin-top: 1%;
+    margin-bottom: 1%;
+    float: left;
+    padding: 1%;
+    width: 68%;
+}
+
 .title {
     width: 80%;
     margin-left: 10%;
@@ -20,12 +29,64 @@
     margin-top: 0;
 }
 
-#search[type=text] {
-    padding: 6px;
-    margin-top: 8px;
-    margin-right: 16px;
+.search {
+    width: 100%;
+}
+
+.search input {
+    width: 100%;
     font-size: 17px;
+}
+
+.leftbar {
+    float: left;
+    width: 20%;
+}
+
+.rightbar {
+    float: left;
     width: 80%;
-    margin-left: 10%;
-    
+}
+
+.book {
+    padding: 1%;
+    border: solid 1px #E8E8E8;
+    border-radius: 2px;
+    float: left;
+    margin-bottom: 1%;
+}
+
+.image {
+    width: 15%;
+}
+
+.book-text {
+    width: 85%;
+    float: right;
+}
+
+.image img {
+    float: left;
+    width: 100%;
+}
+
+.book h4 {
+    margin: 0;
+}
+
+.leftbar h3 {
+    text-align: center;
+    font-weight: lighter;
+    font-size: 15px;
+}
+
+.leftbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.leftbar ul li a {
+    color: black;
+    font-size: 14px;
 }
