@@ -1,0 +1,31 @@
+.wide-element {
+    display: block;
+    width: 70%;
+    margin-left: 15%;
+}
+
+.title {
+    width: 80%;
+    margin-left: 10%;
+}
+
+.title h1 {
+    font-size: 60px;
+    margin-bottom: 0;
+}
+
+.title h2 {
+    font-weight: lighter;
+    font-size: 40px;
+    margin-top: 0;
+}
+
+#search[type=text] {
+    padding: 6px;
+    margin-top: 8px;
+    margin-right: 16px;
+    font-size: 17px;
+    width: 80%;
+    margin-left: 10%;
+    
+}

@@ -1,11 +1,7 @@
 body {
   margin: 0px;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
-}
-
-.element {
-  width: 70%;
-  align-self: center;
+  background-color: #E8E8E8;
 }
 
 ul {
@@ -32,11 +28,4 @@ li a {
 
 .active {
   background-color: #4CAF50;
-}
-
-.search[type=text] {
-    padding: 6px;
-    margin-top: 8px;
-    margin-right: 16px;
-    font-size: 17px;
 }
