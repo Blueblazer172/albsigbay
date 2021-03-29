@@ -29,6 +29,11 @@
     width: 100%;
 }
 
+footer{
+    float: left;
+    width: 100%;
+}
+
 footer ul {
     list-style-type: none;
     margin: 0;
