@@ -15,7 +15,7 @@ nav ul {
 nav li {
   float: left;
   color: white;
-  padding: 14px 16px;
+  padding: 10px 16px;
   font-size: 27px;
 }
 
@@ -26,8 +26,19 @@ nav li a {
   text-decoration: none;
 }
 
-.active {
-  background-color: #4CAF50;
+.wide-element {
+  display: block;
+  width: 70%;
+  margin-left: 15%;
+}
+
+.white {
+  background-color: white;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  float: left;
+  padding: 1%;
+  width: 68%;
 }
 
 footer {
