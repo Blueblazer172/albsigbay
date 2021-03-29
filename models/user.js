@@ -31,6 +31,10 @@ let User = sequelize.define('users', {
         type: Sequelize.STRING,
         allowNull: false
     },
+    state: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
     city: {
         type: Sequelize.STRING,
         allowNull: false
@@ -61,7 +65,8 @@ let User = sequelize.define('users', {
             const salt = bcrypt.genSaltSync();
             user.password = bcrypt.hashSync(user.password, salt);
         }
-    }
+    },
+    paranoid: true
 });
 
 User.prototype.validPassword = function(password) {

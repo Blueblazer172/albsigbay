@@ -37,7 +37,7 @@
                             </li>
                         <% } %>
                         <li class="nav-item">
-                            <a class="nav-link h1 <% if(page.toLowerCase() === "profile"){ %> active<% } %>" href="/profile">Profil</a>
+                            <a class="nav-link h1 <% if(page.toLowerCase() === "profile"){ %> active<% } %>" href="/profile/<%= user.id%>">Profil</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link h1" href="/logout">Logout</a>

@@ -3,11 +3,13 @@ const app = express();
 const path = require('path');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const _ = require('lodash');
 const querystring = require('querystring');
 const {Op} = require("sequelize");
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const morgan = require('morgan');
+const multer = require('multer');
 const port = 3000;
 
 // Models
@@ -29,6 +31,31 @@ app.use(morgan('dev'));
 // try parsing requests
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+// set filter for uploading images
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype == 'image/png' || file.mimetype == 'image/jpeg') {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+}
+
+// set multer upload dir
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './public/books/covers')
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+});
+
+const upload = multer({
+    fileFilter,
+    storage: storage
+});
 
 // initialize cookie-parser to allow us access the cookies stored in the browser.
 app.use(cookieParser());
@@ -125,7 +152,11 @@ app.route('/login')
                 ['password', 'registerDate', "createdAt", "updatedAt"].forEach(e => delete userValues[e]);
                 app.locals.user = userValues;
 
-                res.redirect('/profile');
+                if (req.session.user.isAdmin) {
+                    res.redirect('/admin');
+                } else {
+                    res.redirect(`/profile/${userValues.id}`);
+                }
             }
         });
     });
@@ -165,6 +196,10 @@ app.route('/register')
             errors.push("No Street specified");
         }
 
+        if (!req.body.state) {
+            errors.push("No State specified");
+        }
+
         if (!req.body.name) {
             errors.push("No Name specified");
         }
@@ -188,6 +223,7 @@ app.route('/register')
             city: req.body.city,
             email: req.body.email,
             street: req.body.street,
+            state: req.body.state,
             name: req.body.name,
             reMail: req.body.reMail,
             password: req.body.password,
@@ -200,20 +236,31 @@ app.route('/register')
             let userValues = req.session.user;
 
             // remove values that should not be able to be seen in template or session
-            ['password', 'registerDate', "createdAt", "updatedAt"].forEach(e => delete userValues[e]);
+            ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
             app.locals.user = userValues;
-            res.redirect('/profile');
+
+            res.redirect(`/profile/${userValues.id}`);
         }).catch(error => {
             res.redirect('/register');
         });
     });
 
-// route for user's profile
-app.get('/profile', (req, res) => {
+// user's profile
+app.get('/profile/:id', (req, res) => {
     if (req.session.user && req.cookies.user_sid) {
-        res.render('pages/profile');
+        // check if user is actually the user who wants to access its profile
+        if (req.session.user.id == req.params.id) {
+            axios.get(`http://localhost:3000/api/user/${req.params.id}`).then((user) => {
+                let userValues = user.data.data;
+                ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
+                res.render('components/profile', {user: user.data.data});
+            });
+        } else {
+            // if not redirect to user profile of logged in user
+            res.redirect(`/profile/${req.session.user.id}`);
+        }
     } else {
-        res.redirect('/login');
+        res.redirect('/');
     }
 });
 
@@ -221,9 +268,11 @@ app.get('/profile', (req, res) => {
 app.get('/admin', sessionChecker, function (req, res) {
     if (req.session.user && req.cookies.user_sid) {
         if (req.session.user.isAdmin) {
-            res.render('pages/admin');
+            axios.get('http://localhost:3000/api/books').then((books) => {
+                res.render('pages/admin', {books: books.data.data});
+            });
         } else {
-            res.redirect('/profile');
+            res.redirect(`/profile/${req.session.user.id}`);
         }
     } else {
         res.redirect('/');
@@ -277,6 +326,76 @@ app.get("/books/cat/:category", (req, res, next) => {
         }
     });
 });
+
+app.route('/books/add')
+    .get((req, res) => {
+        res.render('components/book/add');
+    })
+    .post(upload.single('cover'), (req, res, next) => {
+        const file = req.file;
+        if (!file) {
+            const error = new Error("Bitte eine Datei hochladen!");
+            error.httpStatusCode = 400;
+            return next(error);
+        }
+
+        const book = {
+            title: req.body.title,
+            isbn: req.body.isbn,
+            author: req.body.author,
+            pages: req.body.pages,
+            description: req.body.description,
+            category: req.body.category,
+            vendor: req.body.vendor,
+            publicationDate: req.body.publicationDate,
+            cover: file.filename
+        };
+
+        Book.create(book).then((res) => {
+            res.redirect('/admin');
+        }).catch((error) => {
+            console.error(error.message)
+        });
+    });
+
+app.get('/book/edit/:id', (req, res, next) => {
+    Book.findOne({where: {id: req.params.id}}).then(function (book) {
+        if (!book) {
+            res.redirect('/');
+        } else {
+            res.render('components/book/edit', {book: book.dataValues});
+        }
+    });
+})
+
+app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
+    const formValues = {
+        title: req.body.title,
+        isbn: req.body.isbn,
+        author: req.body.author,
+        pages: req.body.pages,
+        description: req.body.description,
+        category: req.body.category,
+        vendor: req.body.vendor,
+        publicationDate: req.body.publicationDate
+    };
+
+    let updatedValuesForModel = [];
+    Book.findOne({where: {id: req.params.id}}).then((book) => {
+        Object.entries(formValues).forEach(([key, value]) => {
+            // update only changed values
+            if (book.dataValues[key] != value) {
+                updatedValuesForModel[key] = value;
+            }
+        });
+
+        Book.update(updatedValuesForModel, {where: {id: req.params.id}}).then(() => {
+            res.redirect('/admin');
+        }).catch((error) => {
+            console.error(error.message)
+        });
+    });
+})
 
 app.get("/search", (req, res, next) => {
     res.redirect('/');
@@ -378,6 +497,36 @@ app.put("/api/search", (req, res, next) => {
             "data": books
         });
     });
+});
+
+app.get("/api/user/:id", (req, res, next) => {
+    User.findOne({where: {id: req.params.id}}).then((user) => {
+        if (!user) {
+            res.json({
+                "message": "failure",
+                "data": null
+            });
+        } else {
+            res.json({
+                "message": "success",
+                "data": user
+            });
+        }
+    });
+});
+
+app.delete("/api/user/:id", (req, res, next) => {
+    if (req.session.user && req.cookies.user_sid) {
+        // check if user is actually the user who wants to delete its profile
+        if (req.session.user.id == req.params.id) {
+            // soft delete user
+            User.destroy({where: {id: req.params.id}}).then(() => {
+                res.redirect(303, '/logout');
+            })
+        }
+    } else {
+        res.redirect(`/profile/${req.session.user.id}`);
+    }
 });
 
 // route for handling 404 requests(unavailable routes)

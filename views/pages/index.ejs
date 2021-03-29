@@ -83,7 +83,7 @@
                                             </div>
                                             <div class="col-4 align-self-end">
                                                 <% if (book.borrowedBook) { %>
-                                                    <span class="btn btn-danger">Ausgeliehen bis <%= book.borrowedBook.returnDate.toLocaleDateString("de-DE") %></span>
+                                                    <span class="btn btn-danger">Ausgeliehen</span>
                                                 <% } else { %>
                                                     <a href="/book/borrow/<%= book.id %>" class="btn btn-success">Verfügbar</a>
                                                 <% } %>
