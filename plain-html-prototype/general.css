@@ -2,6 +2,10 @@ body {
   margin: 0px;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   background-color: #E8E8E8;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100vh;
 }
 
 nav ul {
@@ -44,7 +48,7 @@ nav li a {
 footer {
   float: left;
   width: 100%;
-  height: 10px;
+  margin-top: auto;
 }
 
 footer ul {
@@ -66,7 +70,6 @@ footer li a {
   display: block;
   color: white;
   text-align: center;
-  
 }
 
 .right{
