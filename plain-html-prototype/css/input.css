@@ -1,0 +1,58 @@
+.input-fields {
+    width: 50%;
+    float: left;
+}
+
+.input-list {
+    list-style-type: none;
+}
+
+.input-list li {
+    width: 100%;
+    float: left;
+    margin-bottom: 3%;
+}
+
+.input-fields li label {
+    float: left;
+}
+
+.input-fields li input {
+    float: right;
+    width: 70%;
+}
+
+.large-input textarea{
+    float: right;
+    width: 86%;
+    padding: 4px;
+    border: solid 1px #D4D9D5;
+    border-radius: 6px;
+}
+
+.large-input input {
+    width: 86.5%;
+    float: right;
+    border: solid 1px #D4D9D5;
+    border-radius: 6px;
+}
+
+.add-delete-buttons {
+    float: right;
+}
+
+.add-delete-buttons input {
+    padding: 5px 7px;
+    border: none;
+    color: white;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+#button-delete {
+    background-color: #EA1A1A;
+}
+
+#button-add {
+    background-color: #44AC28;
+}

@@ -8,6 +8,20 @@ body {
   min-height: 100vh;
 }
 
+.line{
+  border-bottom: solid 1px #D4D9D5;
+  float: left;
+  width: 100%;
+  margin-bottom: 1%;
+  padding: 10px 0;
+}
+
+.line h1 {
+  float: left;
+  margin: 0;
+  font-weight: normal;
+}
+
 nav ul {
   list-style-type: none;
   margin: 0;
