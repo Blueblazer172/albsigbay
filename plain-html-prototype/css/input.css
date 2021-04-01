@@ -56,3 +56,18 @@
 #button-add {
     background-color: #44AC28;
 }
+
+.register {
+    float: left;
+    margin-top: 2%;
+    width: 100%;
+}
+
+#abschicken {
+    float: right;
+}
+
+.datenschutz {
+    float: left;
+    margin-left: 3%;
+}
