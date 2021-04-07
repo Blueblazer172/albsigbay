@@ -10,6 +10,8 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const morgan = require('morgan');
 const multer = require('multer');
+const crypto = require('crypto');
+const moment = require('moment');
 const port = 3000;
 
 // Models
@@ -23,7 +25,7 @@ app.set('view engine', 'ejs');
 // include file directories
 app.use(express.static(__dirname + '/public/books/covers'));
 app.use(express.static(__dirname + '/views'));
-app.use("/public", express.static(path.join(__dirname, "public")))
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 // set morgan to log info about our requests for development use.
 app.use(morgan('dev'));
@@ -63,7 +65,7 @@ app.use(cookieParser());
 // initialize express-session to allow us track the logged-in user across sessions.
 app.use(session({
     key: 'user_sid',
-    secret: '289rfoiwjf0923hfgp395024',
+    secret: crypto.randomBytes(20).toString('hex'),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -71,8 +73,8 @@ app.use(session({
     }
 }));
 
-// This middleware will check if user's cookie is still saved in browser and user is not set, then automatically log the user out.
-// This usually happens when you stop your express server after login, your cookie still remains saved in the browser.
+// This middleware will check if user's cookie is still saved in browser and
+// user is not set, then automatically log the user out.
 app.use((req, res, next) => {
     if (req.cookies.user_sid && !req.session.user) {
         res.clearCookie('user_sid');
@@ -258,7 +260,7 @@ app.get('/profile/:id', (req, res) => {
 
                 let userValues = user.data.data;
                 ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
-                res.render('components/profile', {user: user.data.data, books: borrowedBooks.data.data});
+                res.render('components/profile', {user: user.data.data, books: borrowedBooks.data.data, moment: moment});
             })).catch(errors => {
                 console.error(errors);
             });
@@ -363,7 +365,7 @@ app.route('/books/add')
         }).catch((error) => {
             console.error(error.message)
         });
-    });
+});
 
 app.get('/book/edit/:id', (req, res, next) => {
     Book.findOne({where: {id: req.params.id}}).then(function (book) {
@@ -373,7 +375,7 @@ app.get('/book/edit/:id', (req, res, next) => {
             res.render('components/book/edit', {book: book.dataValues});
         }
     });
-})
+});
 
 app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
     const formValues = {
@@ -607,16 +609,78 @@ app.get("/api/user/:id/books", (req, res, next) => {
 });
 
 app.delete("/api/user/:id", (req, res, next) => {
-    if (req.session.user && req.cookies.user_sid) {
+    if (app.locals.user) {
         // check if user is actually the user who wants to delete its profile
         if (req.session.user.id == req.params.id) {
             // soft delete user
             User.destroy({where: {id: req.params.id}}).then(() => {
+                // @TODO fix relations when user deleted profile
+                BorrowedBook.destroy({where: {userId: req.params.id}});
                 res.redirect(303, '/logout');
-            })
+            });
         }
     } else {
         res.redirect(`/profile/${req.session.user.id}`);
+    }
+});
+
+app.post('/api/book/borrow/:bookId', (req, res, next) => {
+    if (app.locals.user) {
+        const borrowedBook = {
+            bookId: req.params.bookId,
+            userId: req.session.user.id,
+        }
+
+        BorrowedBook.create(borrowedBook).then(() => {
+            res.json({
+                "message": 'success',
+                "data": {
+                    userId: req.session.user.id
+                }
+            });
+        }).catch((error) => {
+            res.json({
+                "message": 'failure',
+                "data": {
+                    message: error.message
+                }
+            });
+        });
+    } else {
+        res.json({
+            "message": 'failure',
+            "data": {
+                message: 'Not logged in!'
+            }
+        });
+    }
+});
+
+app.delete('/api/book/return/:bookId', (req, res, next) => {
+    if (app.locals.user) {
+        // @TODO check if user is really the user who borrowed the book
+        BorrowedBook.destroy({where: {bookId: req.params.bookId, userId: req.session.user.id}}).then(() => {
+            res.json({
+                "message": 'success',
+                "data": {
+                    userId: req.session.user.id
+                }
+            });
+        }).catch((error) => {
+            res.json({
+                "message": 'failure',
+                "data": {
+                    message: error.message
+                }
+            });
+        });
+    } else {
+        res.json({
+            "message": 'failure',
+            "data": {
+                message: 'Not logged in!'
+            }
+        });
     }
 });
 

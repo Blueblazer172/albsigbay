@@ -1,7 +1,7 @@
 let Sequelize = require('sequelize');
 const Book = require("./book");
 const User = require("./user");
-
+const moment = require("moment");
 
 // create a sequelize instance with our local postgres database information.
 const sequelize = new Sequelize({
@@ -14,35 +14,33 @@ let BorrowedBook = sequelize.define('borrowedBooks', {
     bookId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        unique: true,
-        references: {
-            model: Book,
-            key: 'id'
-        }
+        unique: true
     },
     userId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
+        unique: false,
+        onDelete: 'CASCADE',
         references: {
             model: User,
             key: 'id'
-        },
-        allowNull: false,
-        unique: false
+        }
     },
     borrowedDate: {
-        type: Sequelize.DATEONLY,
-        defaultValue: Sequelize.NOW
+        type: Sequelize.DATE,
+        defaultValue: moment()
     },
     returnDate: {
-        type: Sequelize.DATEONLY,
-        defaultValue: Sequelize.NOW // @TODO add 4 weeks here
-    },
+        type: Sequelize.DATE,
+        defaultValue: moment().add(4, 'weeks')
+    }
 });
 
 User.hasMany(BorrowedBook, {foreignKey: 'id'});
 BorrowedBook.belongsTo(User, {foreignKey: 'id'});
+
 Book.hasOne(BorrowedBook);
-BorrowedBook.hasMany(Book, {foreignKey: 'id'})
+BorrowedBook.hasMany(Book, {foreignKey: 'id', onDelete: 'RESTRICT'})
 
 // create all the defined tables in the specified database.
 sequelize.sync()

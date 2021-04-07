@@ -34,19 +34,22 @@
                                                 <div class="row">
                                                     <div class="col-12">
                                                         <h4 class="card-title" id="title">
-                                                            <a href="/book/edit/<%= book.id %>"><%= book.title %></a>
+                                                            <span><%= book.title %></span>
                                                         </h4>
                                                     </div>
                                                     <div class="col-12 mt-3">
                                                         <p class="card-text" id="description">
                                                             <span>
-                                                                <strong>Ausgeliehen am: <%= book.borrowedBook.borrowedDate %></strong>
+                                                                <strong>Ausgeliehen am: <%= moment(book.borrowedBook.borrowedDate).format('DD-MM-YYYY') %></strong>
                                                             </span>
                                                             <br>
                                                             <span>
-                                                                <strong>Zurückzugeben am: <%= book.borrowedBook.returnDate %></strong>
+                                                                <strong>Zurückzugeben bis spätestens: <%= moment(book.borrowedBook.returnDate).format('DD-MM-YYYY') %></strong>
                                                             </span>
                                                         </p>
+                                                    </div>
+                                                    <div class="col-12 mt-3">
+                                                        <button data-book-id="<%= book.id %>" onclick="returnBook(event, this)" class="btn btn-warning">Buch Zurückgeben</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -168,6 +171,34 @@
                 }
             });
     });
+
+    function returnBook(e, element) {
+        e.preventDefault();
+        let bookId = element.getAttribute('data-book-id');
+
+        swal({
+                title: "Möchtest du wirklich das Buch schon VOR deiner Abgabefrist zurückgeben ?",
+                text: "Dies kann nicht rückgängig gemacht werden!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-success",
+                confirmButtonText: "Ja, Buch zurückgeben!",
+                cancelButtonText: "Abbrechen",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+            function (isConfirm) {
+                if (isConfirm) {
+                    axios.delete(`/api/book/return/${bookId}/`).then((res) => {
+                        if (res.data.message === 'failure') {
+                            window.location.href = '/login';
+                        } else {
+                            window.location.href = `/profile/${res.data.data.userId}`;
+                        }
+                    });
+                }
+            });
+    }
 </script>
 </body>
 </html>
