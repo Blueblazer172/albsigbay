@@ -39,9 +39,10 @@ let BorrowedBook = sequelize.define('borrowedBooks', {
     },
 });
 
-User.hasMany(BorrowedBook);
-BorrowedBook.belongsTo(User);
+User.hasMany(BorrowedBook, {foreignKey: 'id'});
+BorrowedBook.belongsTo(User, {foreignKey: 'id'});
 Book.hasOne(BorrowedBook);
+BorrowedBook.hasMany(Book, {foreignKey: 'id'})
 
 // create all the defined tables in the specified database.
 sequelize.sync()

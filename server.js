@@ -249,10 +249,18 @@ app.get('/profile/:id', (req, res) => {
     if (req.session.user && req.cookies.user_sid) {
         // check if user is actually the user who wants to access its profile
         if (req.session.user.id == req.params.id) {
-            axios.get(`http://localhost:3000/api/user/${req.params.id}`).then((user) => {
+            const getUser = axios.get(`http://localhost:3000/api/user/${req.params.id}`);
+            const getBorrowedBooks = axios.get(`http://localhost:3000/api/user/${req.params.id}/books`);
+
+            axios.all([getUser, getBorrowedBooks]).then(axios.spread((...responses) => {
+                const user = responses[0];
+                const borrowedBooks = responses[1];
+
                 let userValues = user.data.data;
                 ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
-                res.render('components/profile', {user: user.data.data});
+                res.render('components/profile', {user: user.data.data, books: borrowedBooks.data.data});
+            })).catch(errors => {
+                console.error(errors);
             });
         } else {
             // if not redirect to user profile of logged in user
@@ -428,9 +436,10 @@ app.post("/profile/password/:id", (req, res, next) => {
             }
 
             // check for password has changed from old password
-            if (user.validPassword(req.body.oldPassword) === user.validPassword(req.body.newPassword)) {
-                errors.push('oldPassword cannot be the new password');
-            }
+            // @TODO fix this bug not working as expected
+            // if (user.validPassword(req.body.oldPassword) === user.validPassword(req.body.newPassword)) {
+            //     errors.push('oldPassword cannot be the new password');
+            // }
 
             // check if newPassword is reNewPassword
             if (req.body.newPassword !== req.body.reNewPassword) {
@@ -566,6 +575,32 @@ app.get("/api/user/:id", (req, res, next) => {
             res.json({
                 "message": "success",
                 "data": user
+            });
+        }
+    });
+});
+
+app.get("/api/user/:id/books", (req, res, next) => {
+    Book.findAll({
+        include: [{
+            model: BorrowedBook,
+            required: true,
+            where: {
+                userId: req.params.id
+            }
+        }]
+    }).then((borrowedBooks) => {
+        if (!borrowedBooks || borrowedBooks.length <= 0) {
+            res.json({
+                "message": 'failure',
+                "data": {
+                    message: 'Keine ausgeliehene Bücher!'
+                }
+            });
+        } else {
+            res.json({
+                "message": 'success',
+                "data": borrowedBooks
             });
         }
     });
