@@ -2,9 +2,10 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>AlbsigBay - About</title>
+        <title>AlbsigBay - Login</title>
         <link rel="stylesheet" type="text/css" href="css/general.css"/>
-        <link rel="stylesheet"   type="text/css" href="css/static.css"/>
+        <link rel="stylesheet" type="text/css" href="css/static.css"/>
+        <link rel="stylesheet" type="text/css" href="css/input.css"/>
     </head>
     <body>
         <nav>
@@ -18,26 +19,27 @@
               </ul>
         </nav>
         <div class="white wide-element">
-        <div class="main">
             <div class="line">
-                <h1>About</h1>
+                <h1>Login</h1>
             </div>
-            <div class="text">
-                Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, 
-                sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem 
-                ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore 
-                magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata 
-                sanctus est Lorem ipsum dolor sit amet.
+            <div class="input-fields">
+                <ul class="input-list">
+                    <li><label for="e-mail">E-mail: </label><input type="text" placeholder="E-mail eingeben" id="e-mail"></li>
+                    <li><label for="passwort">Passwort </label><input type="text" placeholder="Passwort" id="passwort"></li>
+                </ul>             
             </div>
-            <div class="picture-div">
-                <img src="img/buecherei.png" alt="buecherei">
+            <div class="button">
+                <input type="button" value="Abschicken" id="abschicken"> 
             </div>
-        </div>
+            <div class="register">
+                <p>Noch keinen Account?</p>
+                <a href="register.html">Registrieren</a>
+            </div>
         </div>
         <footer>
             <ul>
                 <li>&copy; AlbsigBay </li>
-                <div class="right">
+            <div class="right">
                 <li><a href="datenschutz.html">Datenschutz</a></li>
                 <li>|</li>
                 <li><a href="impressum.html">Impressum</a></li>

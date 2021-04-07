@@ -15,7 +15,6 @@ h1{
 .text{
     margin-top: 2%;
     margin-bottom: 2%;
-    margin-right: 2%;
     width: 50%;
     float: left;
     color: #373636;
@@ -25,13 +24,25 @@ h1{
     float: right;
     margin-top: 2%;
     margin-bottom: 2%;
-    margin-right: 2%;
+    width: 50%;
 }
-.picture{
+.picture-div img{
     width: 60%;
     float: right;
 }
 
-.back{
-    width: 100%;
+.button{
+    width: 50%;
+    float: left;
+    }
+
+.button input{
+    float: right;
+    margin-top: 11%;
+    margin-right: 2%;
+   
+}
+
+.register{
+    float: left;
 }
