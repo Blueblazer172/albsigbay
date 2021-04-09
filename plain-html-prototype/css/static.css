@@ -46,3 +46,34 @@ h1{
 .register{
     float: left;
 }
+
+.verwalten{
+    border-bottom: solid 1px #D4D9D5;
+}
+
+
+
+.verwalten h2{
+    padding-left: 3%;
+    font-weight: normal;
+    color: #373636;
+}
+
+.passwort{
+    width: 100%;
+    margin-bottom: 1%;
+}
+
+.passwort label{
+    margin-left: 3%;
+    font-weight: normal;
+    color: #373636;
+}
+
+.knopf{
+    margin-left: 3%;
+    background-color: red;
+    color: white;
+    border-color: red;
+    margin-top: 2%;
+}
