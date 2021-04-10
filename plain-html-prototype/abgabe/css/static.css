@@ -77,3 +77,12 @@ h1{
     border-color: red;
     margin-top: 2%;
 }
+
+.wide-text {
+    width: 100%;
+}
+
+.wide-text h2 {
+    font-size: 20px;
+    font-weight: bold;
+}
