@@ -22,51 +22,53 @@
     <div class="line">
         <h1>Registrierung</h1>
     </div>
-    <div class="input-fields">
-        <ul class="input-list">
-            <li><label for="vorname">Vorname: </label>
-                <input type="text" placeholder="Vorname eingeben" id="vorname">
-            </li>
-            <li><label for="email">Email: </label>
-                <input type="text" placeholder="Email eingeben" id="email">
-            </li>
-            <li><label for="passwort">Passwort: </label>
-                <input type="password" placeholder="Passwort eingeben" id="passwort">
-            </li>
-            <li><label for="stadt">Stadt: </label>
-                <input type="text" placeholder="Stadt eingeben" id="stadt">
-            </li>
-            <li><label for="strasse">Straße: </label>
-                <input type="text" placeholder="Straße eingeben" id="strasse">
-            </li>
-        </ul>
-    </div>
-    <div class="input-fields">
-        <ul class="input-list">
-            <li><label for="name">Name: </label>
-                <input type="text" placeholder="Name eingeben" id="name">
-            </li>
-            <li><label for="re-email">RE-Email: </label>
-                <input type="text" placeholder="Email erneut eingeben" id="re-email">
-            </li>
-            <li><label for="re-passwort">RE-Passwort: </label>
-                <input type="password" placeholder="Passwort erneut eingeben" id="re-passwort">
-            </li>
-            <li><label for="plz">PLZ: </label>
-                <input type="text" placeholder="PLZ eingeben" id="plz">
-            </li>
-            <li><label for="hausnummer">Hausnummer: </label>
-                <input type="text" placeholder="Hausnummer eingeben" id="hausnummer">
-            </li>
-        </ul>
-    </div>
-    <div class="register">
-        <div class="datenschutz">
-            <input type="checkbox" id="terms-of-conditions">
-            <label for="terms-of-conditions">Datenschutzerklärung akzeptieren</label>
+    <form id="registerForm">
+        <div class="input-fields">
+            <ul class="input-list">
+                <li><label for="vorname">Vorname: </label>
+                    <input type="text" placeholder="Vorname eingeben" name="vorname" id="vorname">
+                </li>
+                <li><label for="email">Email: </label>
+                    <input type="text" placeholder="Email eingeben" id="email">
+                </li>
+                <li><label for="passwort">Passwort: </label>
+                    <input type="password" placeholder="Passwort eingeben" id="passwort">
+                </li>
+                <li><label for="stadt">Stadt: </label>
+                    <input type="text" placeholder="Stadt eingeben" id="stadt">
+                </li>
+                <li><label for="strasse">Straße: </label>
+                    <input type="text" placeholder="Straße eingeben" id="strasse">
+                </li>
+            </ul>
         </div>
-        <input type="button" id="abschicken" value="Abschicken">
-    </div>
+        <div class="input-fields">
+            <ul class="input-list">
+                <li><label for="name">Name: </label>
+                    <input type="text" placeholder="Name eingeben" id="name">
+                </li>
+                <li><label for="re-email">RE-Email: </label>
+                    <input type="text" placeholder="Email erneut eingeben" id="re-email">
+                </li>
+                <li><label for="re-passwort">RE-Passwort: </label>
+                    <input type="password" placeholder="Passwort erneut eingeben" id="re-passwort">
+                </li>
+                <li><label for="plz">PLZ: </label>
+                    <input type="text" placeholder="PLZ eingeben" id="plz">
+                </li>
+                <li><label for="hausnummer">Hausnummer: </label>
+                    <input type="text" placeholder="Hausnummer eingeben" id="hausnummer">
+                </li>
+            </ul>
+        </div>
+        <div class="register">
+            <div class="datenschutz">
+                <input type="checkbox" id="terms-of-conditions">
+                <label for="terms-of-conditions">Datenschutzerklärung akzeptieren</label>
+            </div>
+            <input type="submit" id="submit" value="Abschicken">
+        </div>
+    </form>
 </div>
 <footer>
     <ul>
@@ -78,5 +80,46 @@
         </div>
     </ul>
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script>
+    $(document).ready(() => {
+        $('#registerForm').on('submit', (e) => {
+            e.preventDefault()
+
+            let userData = {
+                firstname: $('#vorname').val(),
+                name: $('#name').val(),
+                email: $('#email').val(),
+                reEmail: $('#re-email').val(),
+                password: $('#passwort').val(),
+                rePassword: $('#re-passwort').val(),
+                city: $('#stadt').val(),
+                street: $('#strasse').val(),
+                zip: $('#plz').val(),
+                streetNumber: $('#hausnummer').val()
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/register',
+                data: userData,
+                dataType: 'json'
+            }).done((res) => {
+                console.log('success')
+                window.location.href = `/profile/${res.responseJSON.user.id}`
+            }).fail((res) => {
+                let errors = []
+
+                for (let i = 0; i < res.responseJSON.errors.length; i++) {
+                    errors.push('\n' + res.responseJSON.errors[i])
+                }
+
+                alert(errors)
+            })
+
+            console.log(userData)
+        })
+    })
+</script>
 </body>
 </html>
