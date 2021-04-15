@@ -1,0 +1,43 @@
+.book-cover {
+    width: 30%;
+    float: left;
+}
+
+.data {
+    width: 70%;
+    float: left;
+}
+
+.data ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.data li {
+    margin: none;
+}
+
+.available {
+    color: greenyellow;
+}
+
+.unavailable {
+    color: red;
+}
+
+.ausleihen {
+    margin-top: 2%;
+    float: left;
+    width: 100%;
+}
+
+.description {
+    margin: 3% 0;
+    width: 100%;
+    float: left;
+}
+
+.description h2 {
+    font-weight: normal;
+    font-size: 20px;
+}
