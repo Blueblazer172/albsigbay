@@ -2,11 +2,12 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const bodyParser = require('body-parser');
+const helper = require('./helper');
 const port = 3000;
 
 app.use(express.static(__dirname + '/views'));
 app.use(express.static(__dirname + '/assets'));
-app.use(bodyParser.urlencoded({ extended: true}));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use((request, response, next) => {
     response.setHeader("Access-Control-Allow-Origin", "*");
@@ -15,7 +16,21 @@ app.use((request, response, next) => {
     next();
 });
 
+const Database = require("better-sqlite3");
+const dbFile = "./db.sqlite";
+const dbConnection = new Database(dbFile, {verbose: console.log});
+
+// set dbConnection as global var
+app.locals.dbConnection = dbConnection;
+
 app.get('/', (req, res) => {
+    // @TODO get data from database
+    // const sql = "SELECT * FROM books";
+    // const statement = app.locals.dbConnection.prepare(sql);
+    // for (const book of statement.iterate()) {
+    //     console.log(book)
+    // }
+
     res.sendFile(path.join(__dirname + '/index.html'));
 });
 
