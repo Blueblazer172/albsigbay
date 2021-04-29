@@ -3,7 +3,6 @@ const app = express();
 const path = require('path');
 const bodyParser = require('body-parser');
 const axios = require('axios');
-const _ = require('lodash');
 const querystring = require('querystring');
 const {Op} = require("sequelize");
 const cookieParser = require('cookie-parser');
@@ -19,6 +18,11 @@ let User = require('./models/user');
 let Book = require('./models/book');
 let BorrowedBook = require('./models/BorrowedBook');
 
+// Relations
+BorrowedBook.hasMany(Book, {foreignKey: 'id', onDelete: 'NO ACTION'});
+User.hasMany(BorrowedBook, {foreignKey: 'id', onDelete: 'NO ACTION'});
+Book.hasMany(BorrowedBook, {foreignKey: 'id', onDelete: 'NO ACTION'});
+
 // set template engine to ejs
 app.set('view engine', 'ejs');
 
@@ -30,7 +34,7 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 // set morgan to log info about our requests for development use.
 app.use(morgan('dev'));
 
-// try parsing requests
+// parse requests
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
@@ -49,11 +53,13 @@ const storage = multer.diskStorage({
         cb(null, './public/books/covers')
     },
     filename: (req, file, cb) => {
+        // generate random suffix for filename
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
         cb(null, uniqueSuffix + '-' + file.originalname);
     }
 });
 
+// multer config
 const upload = multer({
     fileFilter,
     storage: storage
@@ -62,7 +68,7 @@ const upload = multer({
 // initialize cookie-parser to allow us access the cookies stored in the browser.
 app.use(cookieParser());
 
-// initialize express-session to allow us track the logged-in user across sessions.
+// initialize express-session to allow to track the logged-in user across sessions.
 app.use(session({
     key: 'user_sid',
     secret: crypto.randomBytes(20).toString('hex'),
@@ -118,10 +124,10 @@ app.get('/', sessionChecker, (req, res) => {
     axios.all([getBooks, getCategories]).then(axios.spread((...responses) => {
         const books = responses[0];
         const categories = responses[1];
-        res.render('pages/index', {books: books.data.data, categories: categories.data.data});
+        res.render('pages/index', {books: books.data.data, categories: categories.data.data, isAdmin: app.locals.user.isAdmin});
     })).catch(errors => {
         console.error(errors);
-    })
+    });
 });
 
 // route for user login
@@ -253,14 +259,21 @@ app.get('/profile/:id', (req, res) => {
         if (req.session.user.id == req.params.id) {
             const getUser = axios.get(`http://localhost:3000/api/user/${req.params.id}`);
             const getBorrowedBooks = axios.get(`http://localhost:3000/api/user/${req.params.id}/books`);
+            const getBorrowedBooksHistory = axios.get(`http://localhost:3000/api/user/${req.params.id}/books/history`);
 
-            axios.all([getUser, getBorrowedBooks]).then(axios.spread((...responses) => {
+            axios.all([getUser, getBorrowedBooks, getBorrowedBooksHistory]).then(axios.spread((...responses) => {
                 const user = responses[0];
                 const borrowedBooks = responses[1];
+                const borrowedBooksHistory = responses[2];
 
                 let userValues = user.data.data;
                 ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
-                res.render('components/profile', {user: user.data.data, books: borrowedBooks.data.data, moment: moment});
+                res.render('components/profile', {
+                    user: user.data.data,
+                    books: borrowedBooks.data.data,
+                    booksHistory: borrowedBooksHistory.data.data,
+                    moment: moment
+                });
             })).catch(errors => {
                 console.error(errors);
             });
@@ -298,17 +311,23 @@ app.get('/logout', (req, res) => {
     }
 });
 
-app.get("/search/:query", (req, res, next) => {
+app.get("/search/:query", sessionChecker, (req, res, next) => {
     // unescape url query parameter
     req.params.query = querystring.unescape(req.params.query);
     if (req.params.query) {
-        axios.put('http://localhost:3000/api/search', {search: req.params.query}).then((filteredBooks) => {
+        axios.put('http://localhost:3000/api/search', {
+            search: req.params.query
+        }).then((filteredBooks) => {
             if (filteredBooks.data.data.length > 0) {
                 axios.get('http://localhost:3000/api/categories').then((categories) => {
-                    res.render('pages/index', {books: filteredBooks.data.data, categories: categories.data.data});
+                    res.render('pages/index', {
+                        books: filteredBooks.data.data,
+                        categories: categories.data.data,
+                        isAdmin: app.locals.user.isAdmin
+                    });
                 });
             } else {
-                res.render('pages/index')
+                res.render('pages/index');
             }
         });
     } else {
@@ -316,22 +335,28 @@ app.get("/search/:query", (req, res, next) => {
     }
 });
 
-app.get("/book/:id", (req, res, next) => {
+app.get("/book/:id", sessionChecker, (req, res, next) => {
     Book.findOne({where: {id: req.params.id}}).then(function (book) {
         if (!book) {
             res.redirect('/');
         } else {
-            res.render('components/book', {data: book});
+            res.render('components/book', {book: book, user: app.locals.user});
         }
     });
 });
 
-app.get("/books/cat/:category", (req, res, next) => {
+app.get("/books/cat/:category", sessionChecker, (req, res, next) => {
     Book.findAll({where: {category: req.params.category}}).then(function (books) {
         if (!books) {
             res.redirect('/');
         } else {
-            res.render('pages/index', {books: books, categories: [{category: req.params.category}]});
+            res.render('pages/index', {
+                books: books,
+                categories: [
+                    {category: req.params.category}
+                ],
+                isAdmin: app.locals.user.isAdmin
+            });
         }
     });
 });
@@ -480,6 +505,11 @@ app.get('/gdpr', sessionChecker, function (req, res) {
     res.render('pages/gdpr');
 });
 
+
+
+
+
+
 // API Endpoints
 
 app.get("/api/users", (req, res, next) => {
@@ -608,6 +638,33 @@ app.get("/api/user/:id/books", (req, res, next) => {
     });
 });
 
+app.get("/api/user/:id/books/history", (req, res, next) => {
+    Book.findAll({
+        include: [{
+            model: BorrowedBook,
+            required: true,
+            paranoid: false, // get only soft-deleted rows
+            where: {
+                userId: req.params.id
+            }
+        }]
+    }).then((borrowedBooks) => {
+        if (!borrowedBooks || borrowedBooks.length <= 0) {
+            res.json({
+                "message": 'failure',
+                "data": {
+                    message: 'Keine vergangen Ausleihen!'
+                }
+            });
+        } else {
+            res.json({
+                "message": 'success',
+                "data": borrowedBooks
+            });
+        }
+    });
+});
+
 app.delete("/api/user/:id", (req, res, next) => {
     if (app.locals.user) {
         // check if user is actually the user who wants to delete its profile
@@ -624,11 +681,11 @@ app.delete("/api/user/:id", (req, res, next) => {
     }
 });
 
-app.post('/api/book/borrow/:bookId', (req, res, next) => {
-    if (app.locals.user) {
+app.post('/api/book/borrow/:bookId', sessionChecker, (req, res, next) => {
+    if (!app.locals.user.isAdmin) {
         const borrowedBook = {
             bookId: req.params.bookId,
-            userId: req.session.user.id,
+            userId: app.locals.user.id,
         }
 
         BorrowedBook.create(borrowedBook).then(() => {
@@ -650,16 +707,16 @@ app.post('/api/book/borrow/:bookId', (req, res, next) => {
         res.json({
             "message": 'failure',
             "data": {
-                message: 'Not logged in!'
+                message: 'Admins can\'t borrow books!'
             }
         });
     }
 });
 
-app.delete('/api/book/return/:bookId', (req, res, next) => {
-    if (app.locals.user) {
-        // @TODO check if user is really the user who borrowed the book
-        BorrowedBook.destroy({where: {bookId: req.params.bookId, userId: req.session.user.id}}).then(() => {
+app.delete('/api/book/return/:bookId', sessionChecker, (req, res, next) => {
+    // @TODO check if user is really the user who borrowed the book
+    if (req.session.user.id === app.locals.user.id) {
+        BorrowedBook.destroy({where: {bookId: req.params.bookId, userId: app.locals.user.id}}).then(() => {
             res.json({
                 "message": 'success',
                 "data": {
@@ -678,7 +735,7 @@ app.delete('/api/book/return/:bookId', (req, res, next) => {
         res.json({
             "message": 'failure',
             "data": {
-                message: 'Not logged in!'
+                message: 'You are not the user who borrowed the book!'
             }
         });
     }

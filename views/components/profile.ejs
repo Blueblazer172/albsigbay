@@ -17,6 +17,7 @@
             <div class="row">
                 <h1 class="display-4">Ausgeliehene Bücher:</h1>
                 <hr>
+<!--                Currently borrowed Books-->
                 <% if (typeof books.message === 'undefined') { %>
                     <div class="mt-4">
                         <div id="books" class="container">
@@ -37,20 +38,22 @@
                                                             <span><%= book.title %></span>
                                                         </h4>
                                                     </div>
-                                                    <div class="col-12 mt-3">
-                                                        <p class="card-text" id="description">
-                                                            <span>
-                                                                <strong>Ausgeliehen am: <%= moment(book.borrowedBook.borrowedDate).format('DD-MM-YYYY') %></strong>
-                                                            </span>
-                                                            <br>
-                                                            <span>
-                                                                <strong>Zurückzugeben bis spätestens: <%= moment(book.borrowedBook.returnDate).format('DD-MM-YYYY') %></strong>
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                    <div class="col-12 mt-3">
-                                                        <button data-book-id="<%= book.id %>" onclick="returnBook(event, this)" class="btn btn-warning">Buch Zurückgeben</button>
-                                                    </div>
+                                                    <% book.borrowedBooks.forEach(function (borrowedBook) { %>
+                                                        <div class="col-12 mt-3">
+                                                            <p class="card-text" id="description">
+                                                                <span>
+                                                                    <strong>Ausgeliehen am: <%= moment(borrowedBook.borrowedDate).format('DD-MM-YYYY') %></strong>
+                                                                </span>
+                                                                <br>
+                                                                <span>
+                                                                    <strong>Zurückzugeben bis spätestens: <%= moment(borrowedBook.returnDate).format('DD-MM-YYYY') %></strong>
+                                                                </span>
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-12 mt-3">
+                                                            <button data-book-id="<%= book.id %>" onclick="returnBook(event, this)" class="btn btn-warning">Buch Zurückgeben</button>
+                                                        </div>
+                                                    <% }); %>
                                                 </div>
                                             </div>
                                         </div>
@@ -61,6 +64,54 @@
                     </div>
                 <% } else { %>
                     <%= books.message %>
+                <% } %>
+                <br>
+                <br>
+<!--                Book History-->
+                <% if (typeof booksHistory.message === 'undefined') { %>
+                    <h1 class="display-4">Vergange Ausleihen:</h1>
+                    <hr>
+                    <div class="mt-4">
+                        <div id="books" class="container">
+                            <% booksHistory.forEach(function(book) { %>
+                                <div class="card mb-3" style="opacity: 50%">
+                                    <div class="row mt-3 mb-3">
+                                        <div class="col-2 mr-3 col-xs-12">
+                                            <img src="/public/books/covers/<%= book.cover %>" width="200px" height="auto" alt="<%= book.title %>">
+                                        </div>
+                                        <div class="col-9 col-xs-12 ms-1 me-0 ps-5 pe-0">
+                                            <div class="card-block px-2">
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <h4 class="card-title" id="title">
+                                                            <span><%= book.title %></span>
+                                                        </h4>
+                                                    </div>
+                                                    <% book.borrowedBooks.forEach(function (borrowedBook) { %>
+                                                        <div class="col-12 mt-3">
+                                                            <p class="card-text" id="description">
+                                                                <span>
+                                                                    <strong>Ausgeliehen am:
+                                                                        <%= moment(borrowedBook.borrowedDate).format('DD-MM-YYYY') %>
+                                                                        um:
+                                                                        <%= moment(borrowedBook.borrowedDate).format('hh:mm:ss') %>
+                                                                    </strong>
+                                                                </span>
+                                                                <br>
+                                                                <span>
+                                                                    <strong>Zurückzugeben bis spätestens: <%= moment(borrowedBook.returnDate).format('DD-MM-YYYY hh:mm:ss') %></strong>
+                                                                </span>
+                                                            </p>
+                                                        </div>
+                                                    <% }); %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
                 <% } %>
             </div>
         <% } %>

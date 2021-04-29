@@ -14,13 +14,18 @@ let BorrowedBook = sequelize.define('borrowedBooks', {
     bookId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        unique: true
+        unique: true,
+        onDelete: 'No ACTION',
+        references: {
+            model: Book,
+            key: 'id'
+        }
     },
     userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         unique: false,
-        onDelete: 'CASCADE',
+        onDelete: 'No ACTION',
         references: {
             model: User,
             key: 'id'
@@ -34,13 +39,9 @@ let BorrowedBook = sequelize.define('borrowedBooks', {
         type: Sequelize.DATE,
         defaultValue: moment().add(4, 'weeks')
     }
+}, {
+    paranoid: true
 });
-
-User.hasMany(BorrowedBook, {foreignKey: 'id'});
-BorrowedBook.belongsTo(User, {foreignKey: 'id'});
-
-Book.hasOne(BorrowedBook);
-BorrowedBook.hasMany(Book, {foreignKey: 'id', onDelete: 'RESTRICT'})
 
 // create all the defined tables in the specified database.
 sequelize.sync()

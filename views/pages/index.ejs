@@ -84,10 +84,12 @@
                                                 <a href="/book/<%= book.id %>" class="btn btn-primary">Mehr...</a>
                                             </div>
                                             <div class="col-4 align-self-end">
-                                                <% if (book.borrowedBook) { %>
-                                                    <span class="btn btn-danger">Ausgeliehen</span>
-                                                <% } else { %>
-                                                    <button data-book-id="<%= book.id %>" onclick="borrowBook(event, this)" class="btn btn-success">Verfügbar</button>
+                                                <% if (!isAdmin) {%>
+                                                    <% if (book.borrowedBook) { %>
+                                                        <span class="btn btn-danger">Ausgeliehen</span>
+                                                    <% } else { %>
+                                                        <button data-book-id="<%= book.id %>" onclick="borrowBook(event, this)" class="btn btn-success">Verfügbar</button>
+                                                    <% } %>
                                                 <% } %>
                                             </div>
                                         </div>
