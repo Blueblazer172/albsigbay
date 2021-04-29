@@ -5,13 +5,13 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const querystring = require('querystring');
 const {Op} = require("sequelize");
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
 const morgan = require('morgan');
 const multer = require('multer');
-const crypto = require('crypto');
 const moment = require('moment');
 const port = 3000;
+
+// import jwt auth file
+const jwt = require('./jwt');
 
 // Models
 let User = require('./models/user');
@@ -20,8 +20,10 @@ let BorrowedBook = require('./models/BorrowedBook');
 
 // Relations
 BorrowedBook.hasMany(Book, {foreignKey: 'id', onDelete: 'NO ACTION'});
-User.hasMany(BorrowedBook, {foreignKey: 'id', onDelete: 'NO ACTION'});
 Book.hasMany(BorrowedBook, {foreignKey: 'id', onDelete: 'NO ACTION'});
+
+User.hasMany(BorrowedBook, {foreignKey: 'id'});
+BorrowedBook.hasMany(User, {foreignKey: 'id', onDelete: 'NO ACTION'})
 
 // set template engine to ejs
 app.set('view engine', 'ejs');
@@ -37,6 +39,22 @@ app.use(morgan('dev'));
 // parse requests
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+// Error Handler
+const errorHandler = (err, req, res, next) => {
+    if (typeof (err) === 'string') {
+        // custom application error
+        return res.status(400).json({ message: err });
+    }
+
+    if (err.name === 'UnauthorizedError') {
+        // jwt authentication error
+        return res.status(401).json({ message: 'Invalid Token' });
+    }
+
+    // default to 500 server error
+    return res.status(500).json({ message: err.message });
+}
 
 // set filter for uploading images
 const fileFilter = (req, file, cb) => {
@@ -65,35 +83,38 @@ const upload = multer({
     storage: storage
 });
 
-// initialize cookie-parser to allow us access the cookies stored in the browser.
-app.use(cookieParser());
-
-// initialize express-session to allow to track the logged-in user across sessions.
-app.use(session({
-    key: 'user_sid',
-    secret: crypto.randomBytes(20).toString('hex'),
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        expires: 600000
-    }
-}));
-
-// This middleware will check if user's cookie is still saved in browser and
+// This middleware will check if user's token is still valid and
 // user is not set, then automatically log the user out.
-app.use((req, res, next) => {
-    if (req.cookies.user_sid && !req.session.user) {
-        res.clearCookie('user_sid');
-        res.redirect('/')
+app.use(errorHandler, (req, res, next) => {
+    if (app.locals.token && !app.locals.user) {
+        app.locals.token = null;
+        res.redirect('/');
     } else {
         next();
     }
 });
 
-// middleware function to check for logged-in users
-let sessionChecker = (req, res, next) => {
-    if (req.session.user && req.cookies.user_sid) {
-        let userValues = req.session.user;
+// // middleware function to check for logged-in users
+let tokenChecker = (req, res, next) => {
+    if (app.locals.user && app.locals.token) {
+        let verifyOptions = {
+            issuer:  'AlbsigBay',
+            subject:  app.locals.user.email,
+            audience:  app.locals.user.id.toString(),
+            expiresIn:  '12h',
+            algorithm:  ['RS256']
+        };
+
+        let isValid = jwt.verify(app.locals.token, verifyOptions);
+
+        if (!isValid) {
+            // remove token
+            app.locals.token = null;
+            res.redirect('/');
+        }
+
+        let userValues = app.locals.user;
+
         // remove values that should not be able to be seen in template or session
         ['password', 'registerDate', "createdAt", "updatedAt"].forEach(e => delete userValues[e]);
         app.locals.user = userValues;
@@ -109,7 +130,6 @@ let sessionChecker = (req, res, next) => {
             next();
         }
     } else {
-        app.locals.user = false;
         next();
     }
 };
@@ -117,14 +137,17 @@ let sessionChecker = (req, res, next) => {
 // SITE ENDPOINTS
 
 // index page
-app.get('/', sessionChecker, (req, res) => {
+app.get('/', tokenChecker, (req, res, next) => {
+    let decodedOptions = jwt.decode(app.locals.token);
+    app.locals.isAdmin = decodedOptions ? decodedOptions.payload.isAdmin : false;
+
     const getBooks = axios.get('http://localhost:3000/api/books');
     const getCategories = axios.get('http://localhost:3000/api/categories');
 
     axios.all([getBooks, getCategories]).then(axios.spread((...responses) => {
         const books = responses[0];
         const categories = responses[1];
-        res.render('pages/index', {books: books.data.data, categories: categories.data.data, isAdmin: app.locals.user.isAdmin});
+        res.render('pages/index', {books: books.data.data, categories: categories.data.data, isAdmin: app.locals.isAdmin});
     })).catch(errors => {
         console.error(errors);
     });
@@ -132,7 +155,7 @@ app.get('/', sessionChecker, (req, res) => {
 
 // route for user login
 app.route('/login')
-    .get(sessionChecker, (req, res) => {
+    .get((req, res) => {
         res.render('pages/login');
     })
     .post((req, res) => {
@@ -153,13 +176,26 @@ app.route('/login')
                 res.redirect('/login');
             } else {
                 let userValues = user.dataValues;
-                req.session.user = user.dataValues;
+
+                let signOptions = {
+                    issuer:  'AlbsigBay',
+                    subject:  user.email,
+                    audience:  user.id.toString(),
+                    expiresIn:  '12h',
+                    algorithm:  'RS256'
+                };
+
+                let payload = {
+                    isAdmin: user.isAdmin,
+                }
+
+                app.locals.token = jwt.sign(payload, signOptions);
 
                 // remove values that should not be able to be seen in template or session
-                ['password', 'registerDate', "createdAt", "updatedAt"].forEach(e => delete userValues[e]);
+                //['password', 'registerDate', 'createdAt'].forEach(e => delete userValues[e]);
                 app.locals.user = userValues;
 
-                if (req.session.user.isAdmin) {
+                if (app.locals.user.isAdmin) {
                     res.redirect('/admin');
                 } else {
                     res.redirect(`/profile/${userValues.id}`);
@@ -170,7 +206,7 @@ app.route('/login')
 
 // route for user registration
 app.route('/register')
-    .get(sessionChecker, (req, res) => {
+    .get((req, res) => {
         res.render('pages/register');
     })
     .post((req, res) => {
@@ -253,65 +289,53 @@ app.route('/register')
     });
 
 // user's profile
-app.get('/profile/:id', (req, res) => {
-    if (req.session.user && req.cookies.user_sid) {
-        // check if user is actually the user who wants to access its profile
-        if (req.session.user.id == req.params.id) {
-            const getUser = axios.get(`http://localhost:3000/api/user/${req.params.id}`);
-            const getBorrowedBooks = axios.get(`http://localhost:3000/api/user/${req.params.id}/books`);
-            const getBorrowedBooksHistory = axios.get(`http://localhost:3000/api/user/${req.params.id}/books/history`);
-
-            axios.all([getUser, getBorrowedBooks, getBorrowedBooksHistory]).then(axios.spread((...responses) => {
-                const user = responses[0];
-                const borrowedBooks = responses[1];
-                const borrowedBooksHistory = responses[2];
-
-                let userValues = user.data.data;
-                ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
-                res.render('components/profile', {
-                    user: user.data.data,
-                    books: borrowedBooks.data.data,
-                    booksHistory: borrowedBooksHistory.data.data,
-                    moment: moment
-                });
-            })).catch(errors => {
-                console.error(errors);
-            });
-        } else {
-            // if not redirect to user profile of logged in user
-            res.redirect(`/profile/${req.session.user.id}`);
-        }
-    } else {
+app.get('/profile/:id', tokenChecker, (req, res) => {
+    if (!app.locals.user || (app.locals.user && (parseInt(app.locals.user.id) !== parseInt(req.params.id)))) {
         res.redirect('/');
+    } else {
+        const getUser = axios.get(`http://localhost:3000/api/user/${req.params.id}`);
+        const getBorrowedBooks = axios.get(`http://localhost:3000/api/user/${req.params.id}/books`);
+        const getBorrowedBooksHistory = axios.get(`http://localhost:3000/api/user/${req.params.id}/books/history`);
+
+        axios.all([getUser, getBorrowedBooks, getBorrowedBooksHistory]).then(axios.spread((...responses) => {
+            const user = responses[0];
+            const borrowedBooks = responses[1];
+            const borrowedBooksHistory = responses[2];
+
+            let userValues = user.data.data;
+            ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
+            res.render('components/profile', {
+                user: user.data.data,
+                books: borrowedBooks.data.data,
+                booksHistory: borrowedBooksHistory.data.data,
+                moment: moment
+            });
+        })).catch(errors => {
+            console.error(errors);
+        });
     }
+
 });
 
 // admin route
-app.get('/admin', sessionChecker, function (req, res) {
-    if (req.session.user && req.cookies.user_sid) {
-        if (req.session.user.isAdmin) {
-            axios.get('http://localhost:3000/api/books').then((books) => {
-                res.render('pages/admin', {books: books.data.data});
-            });
-        } else {
-            res.redirect(`/profile/${req.session.user.id}`);
-        }
-    } else {
+app.get('/admin', tokenChecker, function (req, res) {
+    if (!app.locals.isAdmin) {
         res.redirect('/');
+    } else {
+        axios.get('http://localhost:3000/api/books').then((books) => {
+            res.render('pages/admin', {books: books.data.data});
+        });
     }
 });
 
 // route for user logout
 app.get('/logout', (req, res) => {
-    if (req.session.user && req.cookies.user_sid) {
-        res.clearCookie('user_sid');
-        res.redirect('/');
-    } else {
-        res.redirect('/login');
-    }
+    app.locals.token = null;
+    app.locals.user = null;
+    res.redirect('/');
 });
 
-app.get("/search/:query", sessionChecker, (req, res, next) => {
+app.get("/search/:query", (req, res, next) => {
     // unescape url query parameter
     req.params.query = querystring.unescape(req.params.query);
     if (req.params.query) {
@@ -335,7 +359,7 @@ app.get("/search/:query", sessionChecker, (req, res, next) => {
     }
 });
 
-app.get("/book/:id", sessionChecker, (req, res, next) => {
+app.get("/book/:id", (req, res, next) => {
     Book.findOne({where: {id: req.params.id}}).then(function (book) {
         if (!book) {
             res.redirect('/');
@@ -345,7 +369,7 @@ app.get("/book/:id", sessionChecker, (req, res, next) => {
     });
 });
 
-app.get("/books/cat/:category", sessionChecker, (req, res, next) => {
+app.get("/books/cat/:category", (req, res, next) => {
     Book.findAll({where: {category: req.params.category}}).then(function (books) {
         if (!books) {
             res.redirect('/');
@@ -403,6 +427,13 @@ app.get('/book/edit/:id', (req, res, next) => {
 });
 
 app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
+    const file = req.file;
+    if (!file) {
+        const error = new Error("Bitte eine Datei hochladen!");
+        error.httpStatusCode = 400;
+        return next(error);
+    }
+
     const formValues = {
         title: req.body.title,
         isbn: req.body.isbn,
@@ -411,7 +442,8 @@ app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
         description: req.body.description,
         category: req.body.category.toLowerCase(),
         vendor: req.body.vendor,
-        publicationDate: req.body.publicationDate
+        publicationDate: req.body.publicationDate,
+        cover: file.filename
     };
 
     let updatedValuesForModel = [];
@@ -493,15 +525,15 @@ app.get("/search", (req, res, next) => {
     res.redirect('/');
 });
 
-app.get('/about', sessionChecker, function (req, res) {
+app.get('/about', function (req, res) {
     res.render('pages/about');
 });
 
-app.get('/faq', sessionChecker, function (req, res) {
+app.get('/faq', function (req, res) {
     res.render('pages/faq');
 });
 
-app.get('/gdpr', sessionChecker, function (req, res) {
+app.get('/gdpr', function (req, res) {
     res.render('pages/gdpr');
 });
 
@@ -681,7 +713,7 @@ app.delete("/api/user/:id", (req, res, next) => {
     }
 });
 
-app.post('/api/book/borrow/:bookId', sessionChecker, (req, res, next) => {
+app.post('/api/book/borrow/:bookId', (req, res, next) => {
     if (!app.locals.user.isAdmin) {
         const borrowedBook = {
             bookId: req.params.bookId,
@@ -713,7 +745,7 @@ app.post('/api/book/borrow/:bookId', sessionChecker, (req, res, next) => {
     }
 });
 
-app.delete('/api/book/return/:bookId', sessionChecker, (req, res, next) => {
+app.delete('/api/book/return/:bookId', (req, res, next) => {
     // @TODO check if user is really the user who borrowed the book
     if (req.session.user.id === app.locals.user.id) {
         BorrowedBook.destroy({where: {bookId: req.params.bookId, userId: app.locals.user.id}}).then(() => {
@@ -739,11 +771,6 @@ app.delete('/api/book/return/:bookId', sessionChecker, (req, res, next) => {
             }
         });
     }
-});
-
-// route for handling 404 requests(unavailable routes)
-app.use(function (req, res, next) {
-    res.status(404).send("Sorry diese Seite gibt es nicht!")
 });
 
 app.listen(port, () => {
