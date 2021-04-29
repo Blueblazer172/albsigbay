@@ -4,7 +4,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const querystring = require('querystring');
-const {Op} = require("sequelize");
+const {Op} = require('sequelize');
 const morgan = require('morgan');
 const multer = require('multer');
 const moment = require('moment');
@@ -31,7 +31,7 @@ app.set('view engine', 'ejs');
 // include file directories
 app.use(express.static(__dirname + '/public/books/covers'));
 app.use(express.static(__dirname + '/views'));
-app.use("/public", express.static(path.join(__dirname, "public")));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // set morgan to log info about our requests for development use.
 app.use(morgan('dev'));
@@ -86,11 +86,17 @@ const upload = multer({
 // This middleware will check if user's token is still valid and
 // user is not set, then automatically log the user out.
 app.use(errorHandler, (req, res, next) => {
-    if (app.locals.token && !app.locals.user) {
+    if (app.locals.token && !app.locals.user || !app.locals.token && app.locals.user) {
         app.locals.token = null;
         res.redirect('/');
     } else {
-        next();
+        if (app.locals.token) {
+            // globally set payload options
+            let decodedOptions = jwt.decode(app.locals.token);
+            app.locals.isAdmin = decodedOptions ? decodedOptions.payload.isAdmin : false;
+        } else {
+            next();
+        }
     }
 });
 
@@ -113,12 +119,6 @@ let tokenChecker = (req, res, next) => {
             res.redirect('/');
         }
 
-        let userValues = app.locals.user;
-
-        // remove values that should not be able to be seen in template or session
-        ['password', 'registerDate', "createdAt", "updatedAt"].forEach(e => delete userValues[e]);
-        app.locals.user = userValues;
-
         if (req.originalUrl.includes('login')) {
             // if logged in as user deny access to login route
             res.redirect('/');
@@ -126,7 +126,7 @@ let tokenChecker = (req, res, next) => {
             // if logged in as user deny access to login register
             res.redirect('/');
         } else {
-            // let active user still see Home route;
+            // redirect to called page if not register or login;
             next();
         }
     } else {
@@ -138,9 +138,6 @@ let tokenChecker = (req, res, next) => {
 
 // index page
 app.get('/', tokenChecker, (req, res, next) => {
-    let decodedOptions = jwt.decode(app.locals.token);
-    app.locals.isAdmin = decodedOptions ? decodedOptions.payload.isAdmin : false;
-
     const getBooks = axios.get('http://localhost:3000/api/books');
     const getCategories = axios.get('http://localhost:3000/api/categories');
 
@@ -175,8 +172,6 @@ app.route('/login')
             } else if (!user.validPassword(password)) {
                 res.redirect('/login');
             } else {
-                let userValues = user.dataValues;
-
                 let signOptions = {
                     issuer:  'AlbsigBay',
                     subject:  user.email,
@@ -189,16 +184,14 @@ app.route('/login')
                     isAdmin: user.isAdmin,
                 }
 
+                // set global required vars
                 app.locals.token = jwt.sign(payload, signOptions);
+                app.locals.user = user.dataValues;
 
-                // remove values that should not be able to be seen in template or session
-                ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
-                app.locals.user = userValues;
-
-                if (app.locals.user.isAdmin) {
+                if (app.locals.isAdmin) {
                     res.redirect('/admin');
                 } else {
-                    res.redirect(`/profile/${userValues.id}`);
+                    res.redirect(`/profile/${app.locals.user.id}`);
                 }
             }
         });
@@ -213,55 +206,55 @@ app.route('/register')
         let errors = [];
         if (!req.body) {
             if (!req.body.firstname) {
-                errors.push("No First Name specified");
+                errors.push('No First Name specified');
             }
 
             if (!req.body.email) {
-                errors.push("No Email specified");
+                errors.push('No Email specified');
             }
 
             if (!req.body.password) {
-                errors.push("No Password specified");
+                errors.push('No Password specified');
             }
 
             if (!req.body.rePassword) {
-                errors.push("No RE-Password specified");
+                errors.push('No RE-Password specified');
             }
 
             if (req.body.password !== req.body.rePassword) {
-                errors.push("Passwords do not match.");
+                errors.push('Passwords do not match.');
             }
 
             if (!req.body.city) {
-                errors.push("No City specified");
+                errors.push('No City specified');
             }
 
             if (!req.body.street) {
-                errors.push("No Street specified");
+                errors.push('No Street specified');
             }
 
             if (!req.body.state) {
-                errors.push("No State specified");
+                errors.push('No State specified');
             }
 
             if (!req.body.name) {
-                errors.push("No Name specified");
+                errors.push('No Name specified');
             }
 
             if (!req.body.zip) {
-                errors.push("No Zip specified");
+                errors.push('No Zip specified');
             }
 
             if (!req.body.streetNumber) {
-                errors.push("No Street Number specified");
+                errors.push('No Street Number specified');
             }
         } else {
-            errors.push("No body specified");
+            errors.push('No body specified');
         }
 
         if (errors.length) {
             // @TODO render errors in template
-            res.status(400).json({"error": errors.join(", ")});
+            res.status(400).json({'error': errors.join(', ')});
             return;
         }
 
@@ -279,8 +272,6 @@ app.route('/register')
             streetNumber: req.body.streetNumber,
             username: req.body.username ? req.body.username : null
         }).then(user => {
-            let userValues = user.dataValues;
-
             let signOptions = {
                 issuer:  'AlbsigBay',
                 subject:  user.email,
@@ -293,14 +284,12 @@ app.route('/register')
                 isAdmin: user.isAdmin,
             }
 
-            // generate jwt token
+            // generate jwt token and set global vars
             app.locals.token = jwt.sign(payload, signOptions);
+            app.locals.user = user.dataValues;
 
-            // remove values that should not be able to be seen in template or session
-            ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
-            app.locals.user = userValues;
-
-            res.redirect(`/profile/${userValues.id}`);
+            // redirect to profile page
+            res.redirect(`/profile/${app.locals.user.id}`);
         }).catch(error => {
             res.redirect('/register');
         });
@@ -353,7 +342,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.get("/search/:query", (req, res, next) => {
+app.get('/search/:query', (req, res, next) => {
     // unescape url query parameter
     req.params.query = querystring.unescape(req.params.query);
     if (req.params.query) {
@@ -365,7 +354,7 @@ app.get("/search/:query", (req, res, next) => {
                     res.render('pages/index', {
                         books: filteredBooks.data.data,
                         categories: categories.data.data,
-                        isAdmin: app.locals.user.isAdmin
+                        isAdmin: app.locals.isAdmin
                     });
                 });
             } else {
@@ -377,17 +366,17 @@ app.get("/search/:query", (req, res, next) => {
     }
 });
 
-app.get("/book/:id", (req, res, next) => {
+app.get('/book/:id', (req, res, next) => {
     Book.findOne({where: {id: req.params.id}}).then((book) => {
         if (!book) {
             res.redirect('/');
         } else {
-            res.render('components/book', {book: book, user: app.locals.user});
+            res.render('components/book', {book: book, isAdmin: app.locals.isAdmin});
         }
     });
 });
 
-app.get("/books/cat/:category", (req, res, next) => {
+app.get('/books/cat/:category', (req, res, next) => {
     Book.findAll({where: {category: req.params.category}}).then((books) => {
         if (!books) {
             res.redirect('/');
@@ -397,7 +386,7 @@ app.get("/books/cat/:category", (req, res, next) => {
                 categories: [
                     {category: req.params.category}
                 ],
-                isAdmin: app.locals.user.isAdmin
+                isAdmin: app.locals.isAdmin
             });
         }
     });
@@ -410,7 +399,7 @@ app.route('/books/add')
     .post(upload.single('cover'), (req, res, next) => {
         const file = req.file;
         if (!file) {
-            const error = new Error("Bitte eine Datei hochladen!");
+            const error = new Error('Bitte eine Datei hochladen!');
             error.httpStatusCode = 400;
             return next(error);
         }
@@ -447,7 +436,7 @@ app.get('/book/edit/:id', (req, res, next) => {
 app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
     const file = req.file;
     if (!file) {
-        const error = new Error("Bitte eine Datei hochladen!");
+        const error = new Error('Bitte eine Datei hochladen!');
         error.httpStatusCode = 400;
         return next(error);
     }
@@ -481,12 +470,12 @@ app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
     });
 });
 
-app.post("/profile/name/:id", (req, res, next) => {
+app.post('/profile/name/:id', (req, res, next) => {
     User.findOne({where: {id: req.params.id}}).then((user) => {
         if (!user) {
             res.json({
-                "message": "failure",
-                "data": null
+                'message': 'failure',
+                'data': null
             });
         } else {
             User.update({firstname: req.body.firstname, name: req.body.name}, {where: {id: req.params.id}})
@@ -497,12 +486,12 @@ app.post("/profile/name/:id", (req, res, next) => {
     });
 });
 
-app.post("/profile/password/:id", (req, res, next) => {
+app.post('/profile/password/:id', (req, res, next) => {
     User.findOne({where: {id: req.params.id}}).then(async (user) => {
         if (!user) {
             res.json({
-                "message": "failure",
-                "data": null
+                'message': 'failure',
+                'data': null
             });
         } else {
             let errors = [];
@@ -525,7 +514,7 @@ app.post("/profile/password/:id", (req, res, next) => {
 
             if (errors.length) {
                 // @TODO render errors in template
-                res.status(400).json({"error": errors.join(", ")});
+                res.status(400).json({'error': errors.join(', ')});
                 return;
             }
 
@@ -539,7 +528,7 @@ app.post("/profile/password/:id", (req, res, next) => {
     });
 });
 
-app.get("/search", (req, res, next) => {
+app.get('/search', (req, res, next) => {
     res.redirect('/');
 });
 
@@ -562,7 +551,7 @@ app.get('/gdpr', (req, res, next) => {
 
 // API Endpoints
 
-app.get("/api/users", (req, res, next) => {
+app.get('/api/users', (req, res, next) => {
     User.findAll({
         attributes: [
             'id',
@@ -580,24 +569,24 @@ app.get("/api/users", (req, res, next) => {
         ]
     }).then((users) => {
         res.json({
-            "message": "success",
-            "data": users
+            'message': 'success',
+            'data': users
         });
     })
 });
 
-app.get("/api/books", (req, res, next) => {
+app.get('/api/books', (req, res, next) => {
     Book.findAll({
         include: [{model: BorrowedBook, required: false}]
     }).then((books) => {
         res.json({
-            "message": "success",
-            "data": books
+            'message': 'success',
+            'data': books
         })
     });
 });
 
-app.get("/api/categories", (req, res, next) => {
+app.get('/api/categories', (req, res, next) => {
     Book.findAll().then(() => {
         Book.aggregate('category', 'DISTINCT', {plain: false}).then((categories) => {
             // [ { DISTINCT: 'it' }, { DISTINCT: 'test' }, { DISTINCT: 'test2' } ] to
@@ -605,14 +594,14 @@ app.get("/api/categories", (req, res, next) => {
             const mappedCategories = categories.map(({DISTINCT: category}) => ({category}));
 
             res.json({
-                "message": "success",
-                "data": mappedCategories
+                'message': 'success',
+                'data': mappedCategories
             });
         });
     });
 });
 
-app.put("/api/search", (req, res, next) => {
+app.put('/api/search', (req, res, next) => {
     Book.findAll({
         where: {
             [Op.or]: [
@@ -655,13 +644,13 @@ app.put("/api/search", (req, res, next) => {
         }
     }).then((books) => {
         res.json({
-            "message": "success",
-            "data": books
+            'message': 'success',
+            'data': books
         });
     });
 });
 
-app.get("/api/user/:id", (req, res, next) => {
+app.get('/api/user/:id', (req, res, next) => {
     User.findOne({
         attributes: [
             'id',
@@ -681,19 +670,19 @@ app.get("/api/user/:id", (req, res, next) => {
     }).then((user) => {
         if (!user) {
             res.json({
-                "message": "failure",
-                "data": null
+                'message': 'failure',
+                'data': null
             });
         } else {
             res.json({
-                "message": "success",
-                "data": user
+                'message': 'success',
+                'data': user
             });
         }
     });
 });
 
-app.get("/api/user/:id/books", (req, res, next) => {
+app.get('/api/user/:id/books', (req, res, next) => {
     Book.findAll({
         include: [{
             model: BorrowedBook,
@@ -705,21 +694,21 @@ app.get("/api/user/:id/books", (req, res, next) => {
     }).then((borrowedBooks) => {
         if (!borrowedBooks || borrowedBooks.length <= 0) {
             res.json({
-                "message": 'failure',
-                "data": {
+                'message': 'failure',
+                'data': {
                     message: 'Keine ausgeliehene Bücher!'
                 }
             });
         } else {
             res.json({
-                "message": 'success',
-                "data": borrowedBooks
+                'message': 'success',
+                'data': borrowedBooks
             });
         }
     });
 });
 
-app.get("/api/user/:id/books/history", (req, res, next) => {
+app.get('/api/user/:id/books/history', (req, res, next) => {
     Book.findAll({
         include: [{
             model: BorrowedBook,
@@ -732,21 +721,21 @@ app.get("/api/user/:id/books/history", (req, res, next) => {
     }).then((borrowedBooks) => {
         if (!borrowedBooks || borrowedBooks.length <= 0) {
             res.json({
-                "message": 'failure',
-                "data": {
+                'message': 'failure',
+                'data': {
                     message: 'Keine vergangen Ausleihen!'
                 }
             });
         } else {
             res.json({
-                "message": 'success',
-                "data": borrowedBooks
+                'message': 'success',
+                'data': borrowedBooks
             });
         }
     });
 });
 
-app.delete("/api/user/:id", (req, res, next) => {
+app.delete('/api/user/:id', (req, res, next) => {
     // check if user is actually the user who wants to delete its profile
     if (app.locals.user && parseInt(app.locals.user.id) === parseInt(req.params.id)) {
         // soft delete user
@@ -761,32 +750,41 @@ app.delete("/api/user/:id", (req, res, next) => {
 });
 
 app.post('/api/book/borrow/:bookId', (req, res, next) => {
-    if (!app.locals.user.isAdmin) {
-        const borrowedBook = {
-            bookId: req.params.bookId,
-            userId: app.locals.user.id,
-        }
+    if (!app.locals.isAdmin) {
+        if (app.locals.user) {
+            const borrowedBook = {
+                bookId: req.params.bookId,
+                userId: app.locals.user.id,
+            }
 
-        // @TODO write RAW SQL for borrow book
-        BorrowedBook.create(borrowedBook).then(() => {
+            // @TODO write RAW SQL for borrow book
+            BorrowedBook.create(borrowedBook).then(() => {
+                res.json({
+                    'message': 'success',
+                    'data': {
+                        userId: app.locals.user.id
+                    }
+                });
+            }).catch((error) => {
+                res.json({
+                    'message': 'failure',
+                    'data': {
+                        message: error.message
+                    }
+                });
+            });
+        } else {
             res.json({
-                "message": 'success',
-                "data": {
-                    userId: req.session.user.id
+                'message': 'failure',
+                'data': {
+                    message: 'Not logged in!'
                 }
             });
-        }).catch((error) => {
-            res.json({
-                "message": 'failure',
-                "data": {
-                    message: error.message
-                }
-            });
-        });
+        }
     } else {
         res.json({
-            "message": 'failure',
-            "data": {
+            'message': 'failure',
+            'data': {
                 message: 'Admins can\'t borrow books!'
             }
         });
@@ -799,23 +797,23 @@ app.delete('/api/book/return/:bookId', (req, res, next) => {
         // @TODO write RAW SQL for return book
         BorrowedBook.destroy({where: {bookId: req.params.bookId, userId: app.locals.user.id}}).then(() => {
             res.json({
-                "message": 'success',
-                "data": {
-                    userId: req.session.user.id
+                'message': 'success',
+                'data': {
+                    userId: app.locals.user.id
                 }
             });
         }).catch((error) => {
             res.json({
-                "message": 'failure',
-                "data": {
+                'message': 'failure',
+                'data': {
                     message: error.message
                 }
             });
         });
     } else {
         res.json({
-            "message": 'failure',
-            "data": {
+            'message': 'failure',
+            'data': {
                 message: 'You are not the user who borrowed the book!'
             }
         });

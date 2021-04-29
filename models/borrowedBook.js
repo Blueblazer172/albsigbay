@@ -1,7 +1,7 @@
 let Sequelize = require('sequelize');
-const Book = require("./book");
-const User = require("./user");
-const moment = require("moment");
+const moment = require('moment');
+const Book = require('./book');
+const User = require('./user');
 
 // create a sequelize instance with our local postgres database information.
 const sequelize = new Sequelize({

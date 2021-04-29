@@ -26,7 +26,7 @@
                     <strong>Seiten: </strong><%= book.pages %>,
                     <strong>Kategorie: </strong><%= book.category.toUpperCase() %>
                 </p>
-                <% if (!user.isAdmin) { %>
+                <% if (!isAdmin) { %>
                     <% if (book.borrowedBook) { %>
                         <span class="btn btn-danger">Ausgeliehen</span>
                     <% } else { %>
