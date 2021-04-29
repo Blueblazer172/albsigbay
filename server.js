@@ -40,22 +40,6 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-// Error Handler
-const errorHandler = (err, req, res, next) => {
-    if (typeof (err) === 'string') {
-        // custom application error
-        return res.status(400).json({ message: err });
-    }
-
-    if (err.name === 'UnauthorizedError') {
-        // jwt authentication error
-        return res.status(401).json({ message: 'Invalid Token' });
-    }
-
-    // default to 500 server error
-    return res.status(500).json({ message: err.message });
-}
-
 // set filter for uploading images
 const fileFilter = (req, file, cb) => {
     if (file.mimetype.toString() === 'image/png' || file.mimetype.toString() === 'image/jpeg') {
@@ -85,18 +69,23 @@ const upload = multer({
 
 // This middleware will check if user's token is still valid and
 // user is not set, then automatically log the user out.
-app.use(errorHandler, (req, res, next) => {
-    if (app.locals.token && !app.locals.user || !app.locals.token && app.locals.user) {
+app.use((req, res, next) => {
+    if (!app.locals.user && app.locals.token) {
         app.locals.token = null;
         res.redirect('/');
     } else {
+        // initialize global var
+        // globally set payload options
         if (app.locals.token) {
-            // globally set payload options
             let decodedOptions = jwt.decode(app.locals.token);
-            app.locals.isAdmin = decodedOptions ? decodedOptions.payload.isAdmin : false;
+            app.locals.payload = decodedOptions.payload;
+            app.locals.isAdmin = decodedOptions.payload.isAdmin;
         } else {
-            next();
+            app.locals.payload = null
+            app.locals.isAdmin = null
         }
+
+        next();
     }
 });
 
@@ -104,9 +93,9 @@ app.use(errorHandler, (req, res, next) => {
 let tokenChecker = (req, res, next) => {
     if (app.locals.user && app.locals.token) {
         let verifyOptions = {
-            issuer:  'AlbsigBay',
-            subject:  app.locals.user.email,
-            audience:  app.locals.user.id.toString()
+            issuer: 'AlbsigBay',
+            subject: app.locals.user.email,
+            audience: app.locals.user.id.toString()
         };
 
         let isValid = jwt.verify(app.locals.token, verifyOptions);
@@ -142,7 +131,11 @@ app.get('/', tokenChecker, (req, res, next) => {
     axios.all([getBooks, getCategories]).then(axios.spread((...responses) => {
         const books = responses[0];
         const categories = responses[1];
-        res.render('pages/index', {books: books.data.data, categories: categories.data.data, isAdmin: app.locals.isAdmin});
+        res.render('pages/index', {
+            books: books.data.data,
+            categories: categories.data.data,
+            isAdmin: app.locals.isAdmin
+        });
     })).catch(errors => {
         console.error(errors);
     });
@@ -171,9 +164,9 @@ app.route('/login')
                 res.redirect('/login');
             } else {
                 let signOptions = {
-                    issuer:  'AlbsigBay',
-                    subject:  user.email,
-                    audience:  user.id.toString()
+                    issuer: 'AlbsigBay',
+                    subject: user.email,
+                    audience: user.id.toString()
                 };
 
                 let payload = {
@@ -184,7 +177,7 @@ app.route('/login')
                 app.locals.token = jwt.sign(payload, signOptions);
                 app.locals.user = user.dataValues;
 
-                if (app.locals.isAdmin) {
+                if (app.locals.user.isAdmin) {
                     res.redirect('/admin');
                 } else {
                     res.redirect(`/profile/${app.locals.user.id}`);
@@ -269,9 +262,9 @@ app.route('/register')
             username: req.body.username ? req.body.username : null
         }).then(user => {
             let signOptions = {
-                issuer:  'AlbsigBay',
-                subject:  user.email,
-                audience:  user.id.toString()
+                issuer: 'AlbsigBay',
+                subject: user.email,
+                audience: user.id.toString()
             };
 
             let payload = {
@@ -415,7 +408,7 @@ app.route('/books/add')
         }).catch((error) => {
             console.error(error.message)
         });
-});
+    });
 
 app.get('/book/edit/:id', (req, res, next) => {
     Book.findOne({where: {id: req.params.id}}).then((book) => {
@@ -537,10 +530,6 @@ app.get('/faq', (req, res, next) => {
 app.get('/gdpr', (req, res, next) => {
     res.render('pages/gdpr');
 });
-
-
-
-
 
 
 // API Endpoints
