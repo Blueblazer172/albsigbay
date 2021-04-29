@@ -106,9 +106,7 @@ let tokenChecker = (req, res, next) => {
         let verifyOptions = {
             issuer:  'AlbsigBay',
             subject:  app.locals.user.email,
-            audience:  app.locals.user.id.toString(),
-            expiresIn:  '12h',
-            algorithm:  ['RS256']
+            audience:  app.locals.user.id.toString()
         };
 
         let isValid = jwt.verify(app.locals.token, verifyOptions);
@@ -175,9 +173,7 @@ app.route('/login')
                 let signOptions = {
                     issuer:  'AlbsigBay',
                     subject:  user.email,
-                    audience:  user.id.toString(),
-                    expiresIn:  '12h',
-                    algorithm:  'RS256'
+                    audience:  user.id.toString()
                 };
 
                 let payload = {
@@ -275,9 +271,7 @@ app.route('/register')
             let signOptions = {
                 issuer:  'AlbsigBay',
                 subject:  user.email,
-                audience:  user.id.toString(),
-                expiresIn:  '12h',
-                algorithm:  'RS256'
+                audience:  user.id.toString()
             };
 
             let payload = {

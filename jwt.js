@@ -12,19 +12,21 @@ module.exports = {
             issuer: options.issuer,
             subject: options.subject,
             audience: options.audience,
-            expiresIn: '30d',    // 30 days validity
+            expiresIn: '12h',
             algorithm: 'RS256'
         };
         return jwt.sign(payload, privateKEY, signOptions);
     },
     verify: (token, options) => {
+        // Token verify options
         let verifyOptions = {
             issuer: options.issuer,
             subject: options.subject,
             audience: options.audience,
-            expiresIn: '30d',
+            expiresIn: '12h',
             algorithm: ['RS256']
         };
+
         try {
             return jwt.verify(token, publicKEY, verifyOptions);
         } catch (err) {
@@ -32,7 +34,6 @@ module.exports = {
         }
     },
     decode: (token) => {
-        //returns null if token is invalid
         return jwt.decode(token, {complete: true});
     }
 }
