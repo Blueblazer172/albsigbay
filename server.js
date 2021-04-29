@@ -58,7 +58,7 @@ const errorHandler = (err, req, res, next) => {
 
 // set filter for uploading images
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype == 'image/png' || file.mimetype == 'image/jpeg') {
+    if (file.mimetype.toString() === 'image/png' || file.mimetype.toString() === 'image/jpeg') {
         cb(null, true);
     } else {
         cb(null, false);
@@ -169,7 +169,7 @@ app.route('/login')
                     {username: emailOrUsername}
                 ]
             }
-        }).then(function (user) {
+        }).then((user) => {
             if (!user) {
                 res.redirect('/login');
             } else if (!user.validPassword(password)) {
@@ -192,7 +192,7 @@ app.route('/login')
                 app.locals.token = jwt.sign(payload, signOptions);
 
                 // remove values that should not be able to be seen in template or session
-                //['password', 'registerDate', 'createdAt'].forEach(e => delete userValues[e]);
+                ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
                 app.locals.user = userValues;
 
                 if (app.locals.user.isAdmin) {
@@ -211,48 +211,52 @@ app.route('/register')
     })
     .post((req, res) => {
         let errors = [];
-        if (!req.body.firstname) {
-            errors.push("No First Name specified");
-        }
+        if (!req.body) {
+            if (!req.body.firstname) {
+                errors.push("No First Name specified");
+            }
 
-        if (!req.body.email) {
-            errors.push("No Email specified");
-        }
+            if (!req.body.email) {
+                errors.push("No Email specified");
+            }
 
-        if (!req.body.password) {
-            errors.push("No Password specified");
-        }
+            if (!req.body.password) {
+                errors.push("No Password specified");
+            }
 
-        if (!req.body.rePassword) {
-            errors.push("No RE-Password specified");
-        }
+            if (!req.body.rePassword) {
+                errors.push("No RE-Password specified");
+            }
 
-        if (req.body.password !== req.body.rePassword) {
-            errors.push("Passwords do not match.");
-        }
+            if (req.body.password !== req.body.rePassword) {
+                errors.push("Passwords do not match.");
+            }
 
-        if (!req.body.city) {
-            errors.push("No City specified");
-        }
+            if (!req.body.city) {
+                errors.push("No City specified");
+            }
 
-        if (!req.body.street) {
-            errors.push("No Street specified");
-        }
+            if (!req.body.street) {
+                errors.push("No Street specified");
+            }
 
-        if (!req.body.state) {
-            errors.push("No State specified");
-        }
+            if (!req.body.state) {
+                errors.push("No State specified");
+            }
 
-        if (!req.body.name) {
-            errors.push("No Name specified");
-        }
+            if (!req.body.name) {
+                errors.push("No Name specified");
+            }
 
-        if (!req.body.zip) {
-            errors.push("No Zip specified");
-        }
+            if (!req.body.zip) {
+                errors.push("No Zip specified");
+            }
 
-        if (!req.body.streetNumber) {
-            errors.push("No Street Number specified");
+            if (!req.body.streetNumber) {
+                errors.push("No Street Number specified");
+            }
+        } else {
+            errors.push("No body specified");
         }
 
         if (errors.length) {
@@ -275,8 +279,22 @@ app.route('/register')
             streetNumber: req.body.streetNumber,
             username: req.body.username ? req.body.username : null
         }).then(user => {
-            req.session.user = user.dataValues;
-            let userValues = req.session.user;
+            let userValues = user.dataValues;
+
+            let signOptions = {
+                issuer:  'AlbsigBay',
+                subject:  user.email,
+                audience:  user.id.toString(),
+                expiresIn:  '12h',
+                algorithm:  'RS256'
+            };
+
+            let payload = {
+                isAdmin: user.isAdmin,
+            }
+
+            // generate jwt token
+            app.locals.token = jwt.sign(payload, signOptions);
 
             // remove values that should not be able to be seen in template or session
             ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
@@ -318,7 +336,7 @@ app.get('/profile/:id', tokenChecker, (req, res) => {
 });
 
 // admin route
-app.get('/admin', tokenChecker, function (req, res) {
+app.get('/admin', tokenChecker, (req, res, next) => {
     if (!app.locals.isAdmin) {
         res.redirect('/');
     } else {
@@ -360,7 +378,7 @@ app.get("/search/:query", (req, res, next) => {
 });
 
 app.get("/book/:id", (req, res, next) => {
-    Book.findOne({where: {id: req.params.id}}).then(function (book) {
+    Book.findOne({where: {id: req.params.id}}).then((book) => {
         if (!book) {
             res.redirect('/');
         } else {
@@ -370,7 +388,7 @@ app.get("/book/:id", (req, res, next) => {
 });
 
 app.get("/books/cat/:category", (req, res, next) => {
-    Book.findAll({where: {category: req.params.category}}).then(function (books) {
+    Book.findAll({where: {category: req.params.category}}).then((books) => {
         if (!books) {
             res.redirect('/');
         } else {
@@ -417,7 +435,7 @@ app.route('/books/add')
 });
 
 app.get('/book/edit/:id', (req, res, next) => {
-    Book.findOne({where: {id: req.params.id}}).then(function (book) {
+    Book.findOne({where: {id: req.params.id}}).then((book) => {
         if (!book) {
             res.redirect('/');
         } else {
@@ -525,15 +543,15 @@ app.get("/search", (req, res, next) => {
     res.redirect('/');
 });
 
-app.get('/about', function (req, res) {
+app.get('/about', (req, res, next) => {
     res.render('pages/about');
 });
 
-app.get('/faq', function (req, res) {
+app.get('/faq', (req, res, next) => {
     res.render('pages/faq');
 });
 
-app.get('/gdpr', function (req, res) {
+app.get('/gdpr', (req, res, next) => {
     res.render('pages/gdpr');
 });
 
@@ -545,7 +563,22 @@ app.get('/gdpr', function (req, res) {
 // API Endpoints
 
 app.get("/api/users", (req, res, next) => {
-    User.findAll().then((users) => {
+    User.findAll({
+        attributes: [
+            'id',
+            'firstname',
+            'name',
+            'username',
+            'email',
+            'city',
+            'state',
+            'zip',
+            'street',
+            'streetNumber',
+            'isAdmin',
+            'registerDate'
+        ]
+    }).then((users) => {
         res.json({
             "message": "success",
             "data": users
@@ -629,7 +662,23 @@ app.put("/api/search", (req, res, next) => {
 });
 
 app.get("/api/user/:id", (req, res, next) => {
-    User.findOne({where: {id: req.params.id}}).then((user) => {
+    User.findOne({
+        attributes: [
+            'id',
+            'firstname',
+            'name',
+            'username',
+            'email',
+            'city',
+            'state',
+            'zip',
+            'street',
+            'streetNumber',
+            'isAdmin',
+            'registerDate'
+        ],
+        where: {id: req.params.id}
+    }).then((user) => {
         if (!user) {
             res.json({
                 "message": "failure",
@@ -698,18 +747,16 @@ app.get("/api/user/:id/books/history", (req, res, next) => {
 });
 
 app.delete("/api/user/:id", (req, res, next) => {
-    if (app.locals.user) {
-        // check if user is actually the user who wants to delete its profile
-        if (req.session.user.id == req.params.id) {
-            // soft delete user
-            User.destroy({where: {id: req.params.id}}).then(() => {
-                // @TODO fix relations when user deleted profile
-                BorrowedBook.destroy({where: {userId: req.params.id}});
-                res.redirect(303, '/logout');
-            });
-        }
+    // check if user is actually the user who wants to delete its profile
+    if (app.locals.user && parseInt(app.locals.user.id) === parseInt(req.params.id)) {
+        // soft delete user
+        User.destroy({where: {id: req.params.id}}).then(() => {
+            // @TODO fix relations when user deleted profile
+            BorrowedBook.destroy({where: {userId: req.params.id}});
+            res.redirect(303, '/logout');
+        });
     } else {
-        res.redirect(`/profile/${req.session.user.id}`);
+        res.redirect('/');
     }
 });
 
@@ -720,6 +767,7 @@ app.post('/api/book/borrow/:bookId', (req, res, next) => {
             userId: app.locals.user.id,
         }
 
+        // @TODO write RAW SQL for borrow book
         BorrowedBook.create(borrowedBook).then(() => {
             res.json({
                 "message": 'success',
@@ -746,8 +794,9 @@ app.post('/api/book/borrow/:bookId', (req, res, next) => {
 });
 
 app.delete('/api/book/return/:bookId', (req, res, next) => {
-    // @TODO check if user is really the user who borrowed the book
-    if (req.session.user.id === app.locals.user.id) {
+    // check if user is really the user who borrowed the book
+    if (app.locals.user && parseInt(app.locals.user.id) === parseInt(req.params.id)) {
+        // @TODO write RAW SQL for return book
         BorrowedBook.destroy({where: {bookId: req.params.bookId, userId: app.locals.user.id}}).then(() => {
             res.json({
                 "message": 'success',
