@@ -125,8 +125,8 @@ let tokenChecker = (req, res, next) => {
 
 // index page
 app.get('/', tokenChecker, (req, res, next) => {
-    const getBooks = axios.get('http://localhost:3000/api/books');
-    const getCategories = axios.get('http://localhost:3000/api/categories');
+    const getBooks = axios.get('http://localhost:4000/api/books');
+    const getCategories = axios.get('http://localhost:4000/api/categories');
 
     axios.all([getBooks, getCategories]).then(axios.spread((...responses) => {
         const books = responses[0];
@@ -287,9 +287,9 @@ app.get('/profile/:id', tokenChecker, (req, res) => {
     if (!app.locals.user || (app.locals.user && (parseInt(app.locals.user.id) !== parseInt(req.params.id)))) {
         res.redirect('/');
     } else {
-        const getUser = axios.get(`http://localhost:3000/api/user/${req.params.id}`);
-        const getBorrowedBooks = axios.get(`http://localhost:3000/api/user/${req.params.id}/books`);
-        const getBorrowedBooksHistory = axios.get(`http://localhost:3000/api/user/${req.params.id}/books/history`);
+        const getUser = axios.get(`http://localhost:4000/api/user/${req.params.id}`);
+        const getBorrowedBooks = axios.get(`http://localhost:4000/api/user/${req.params.id}/books`);
+        const getBorrowedBooksHistory = axios.get(`http://localhost:4000/api/user/${req.params.id}/books/history`);
 
         axios.all([getUser, getBorrowedBooks, getBorrowedBooksHistory]).then(axios.spread((...responses) => {
             const user = responses[0];
@@ -316,7 +316,7 @@ app.get('/admin', tokenChecker, (req, res, next) => {
     if (!app.locals.isAdmin) {
         res.redirect('/');
     } else {
-        axios.get('http://localhost:3000/api/books').then((books) => {
+        axios.get('http://localhost:4000/api/books').then((books) => {
             res.render('pages/admin', {books: books.data.data});
         });
     }
@@ -333,11 +333,11 @@ app.get('/search/:query', (req, res, next) => {
     // unescape url query parameter
     req.params.query = querystring.unescape(req.params.query);
     if (req.params.query) {
-        axios.put('http://localhost:3000/api/search', {
+        axios.put('http://localhost:4000/api/search', {
             search: req.params.query
         }).then((filteredBooks) => {
             if (filteredBooks.data.data.length > 0) {
-                axios.get('http://localhost:3000/api/categories').then((categories) => {
+                axios.get('http://localhost:4000/api/categories').then((categories) => {
                     res.render('pages/index', {
                         books: filteredBooks.data.data,
                         categories: categories.data.data,
@@ -529,278 +529,6 @@ app.get('/faq', (req, res, next) => {
 
 app.get('/gdpr', (req, res, next) => {
     res.render('pages/gdpr');
-});
-
-
-// API Endpoints
-
-app.get('/api/users', (req, res, next) => {
-    User.findAll({
-        attributes: [
-            'id',
-            'firstname',
-            'name',
-            'username',
-            'email',
-            'city',
-            'state',
-            'zip',
-            'street',
-            'streetNumber',
-            'isAdmin',
-            'registerDate'
-        ]
-    }).then((users) => {
-        res.json({
-            'message': 'success',
-            'data': users
-        });
-    })
-});
-
-app.get('/api/books', (req, res, next) => {
-    Book.findAll({
-        include: [{model: BorrowedBook, required: false}]
-    }).then((books) => {
-        res.json({
-            'message': 'success',
-            'data': books
-        })
-    });
-});
-
-app.get('/api/categories', (req, res, next) => {
-    Book.findAll().then(() => {
-        Book.aggregate('category', 'DISTINCT', {plain: false}).then((categories) => {
-            // [ { DISTINCT: 'it' }, { DISTINCT: 'test' }, { DISTINCT: 'test2' } ] to
-            // [ { category: 'it' }, { category: 'test' }, { category: 'test2' } ]
-            const mappedCategories = categories.map(({DISTINCT: category}) => ({category}));
-
-            res.json({
-                'message': 'success',
-                'data': mappedCategories
-            });
-        });
-    });
-});
-
-app.put('/api/search', (req, res, next) => {
-    Book.findAll({
-        where: {
-            [Op.or]: [
-                {
-                    title: {
-                        [Op.substring]: req.body.search
-                    }
-                },
-                {
-                    isbn: {
-                        [Op.substring]: req.body.search
-                    }
-                },
-                {
-                    author: {
-                        [Op.substring]: req.body.search
-                    }
-                },
-                {
-                    category: {
-                        [Op.substring]: req.body.search
-                    }
-                },
-                {
-                    publicationDate: {
-                        [Op.substring]: req.body.search
-                    }
-                },
-                {
-                    vendor: {
-                        [Op.substring]: req.body.search
-                    }
-                },
-                {
-                    description: {
-                        [Op.substring]: req.body.search
-                    }
-                }
-            ]
-        }
-    }).then((books) => {
-        res.json({
-            'message': 'success',
-            'data': books
-        });
-    });
-});
-
-app.get('/api/user/:id', (req, res, next) => {
-    User.findOne({
-        attributes: [
-            'id',
-            'firstname',
-            'name',
-            'username',
-            'email',
-            'city',
-            'state',
-            'zip',
-            'street',
-            'streetNumber',
-            'isAdmin',
-            'registerDate'
-        ],
-        where: {id: req.params.id}
-    }).then((user) => {
-        if (!user) {
-            res.json({
-                'message': 'failure',
-                'data': null
-            });
-        } else {
-            res.json({
-                'message': 'success',
-                'data': user
-            });
-        }
-    });
-});
-
-app.get('/api/user/:id/books', (req, res, next) => {
-    Book.findAll({
-        include: [{
-            model: BorrowedBook,
-            required: true,
-            where: {
-                userId: req.params.id
-            }
-        }]
-    }).then((borrowedBooks) => {
-        if (!borrowedBooks || borrowedBooks.length <= 0) {
-            res.json({
-                'message': 'failure',
-                'data': {
-                    message: 'Keine ausgeliehene Bücher!'
-                }
-            });
-        } else {
-            res.json({
-                'message': 'success',
-                'data': borrowedBooks
-            });
-        }
-    });
-});
-
-app.get('/api/user/:id/books/history', (req, res, next) => {
-    Book.findAll({
-        include: [{
-            model: BorrowedBook,
-            required: true,
-            paranoid: false, // get only soft-deleted rows
-            where: {
-                userId: req.params.id
-            }
-        }]
-    }).then((borrowedBooks) => {
-        if (!borrowedBooks || borrowedBooks.length <= 0) {
-            res.json({
-                'message': 'failure',
-                'data': {
-                    message: 'Keine vergangen Ausleihen!'
-                }
-            });
-        } else {
-            res.json({
-                'message': 'success',
-                'data': borrowedBooks
-            });
-        }
-    });
-});
-
-app.delete('/api/user/:id', (req, res, next) => {
-    // check if user is actually the user who wants to delete its profile
-    if (app.locals.user && parseInt(app.locals.user.id) === parseInt(req.params.id)) {
-        // soft delete user
-        User.destroy({where: {id: req.params.id}}).then(() => {
-            // @TODO fix relations when user deleted profile
-            BorrowedBook.destroy({where: {userId: req.params.id}});
-            res.redirect(303, '/logout');
-        });
-    } else {
-        res.redirect('/');
-    }
-});
-
-app.post('/api/book/borrow/:bookId', (req, res, next) => {
-    if (!app.locals.isAdmin) {
-        if (app.locals.user) {
-            const borrowedBook = {
-                bookId: req.params.bookId,
-                userId: app.locals.user.id,
-            }
-
-            // @TODO write RAW SQL for borrow book
-            BorrowedBook.create(borrowedBook).then(() => {
-                res.json({
-                    'message': 'success',
-                    'data': {
-                        userId: app.locals.user.id
-                    }
-                });
-            }).catch((error) => {
-                res.json({
-                    'message': 'failure',
-                    'data': {
-                        message: error.message
-                    }
-                });
-            });
-        } else {
-            res.json({
-                'message': 'failure',
-                'data': {
-                    message: 'Not logged in!'
-                }
-            });
-        }
-    } else {
-        res.json({
-            'message': 'failure',
-            'data': {
-                message: 'Admins can\'t borrow books!'
-            }
-        });
-    }
-});
-
-app.delete('/api/book/return/:bookId', (req, res, next) => {
-    // check if user is really the user who borrowed the book
-    if (app.locals.user && parseInt(app.locals.user.id) === parseInt(req.params.id)) {
-        // @TODO write RAW SQL for return book
-        BorrowedBook.destroy({where: {bookId: req.params.bookId, userId: app.locals.user.id}}).then(() => {
-            res.json({
-                'message': 'success',
-                'data': {
-                    userId: app.locals.user.id
-                }
-            });
-        }).catch((error) => {
-            res.json({
-                'message': 'failure',
-                'data': {
-                    message: error.message
-                }
-            });
-        });
-    } else {
-        res.json({
-            'message': 'failure',
-            'data': {
-                message: 'You are not the user who borrowed the book!'
-            }
-        });
-    }
 });
 
 app.listen(port, () => {

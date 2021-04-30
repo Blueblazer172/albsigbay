@@ -4,7 +4,8 @@ let bcrypt = require('bcrypt');
 // create a sequelize instance with our local postgres database information.
 const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: 'db.sqlite'
+    storage: 'db.sqlite',
+    // logging: false @TODO needs to be commented in before release
 });
 
 // setup User model and its fields.
