@@ -117,4 +117,3 @@ dist
 
 .idea
 .DS_Store
-*.sqlite

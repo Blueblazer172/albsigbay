@@ -1,3 +1,4 @@
+// Server Endpoints
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -121,8 +122,6 @@ let tokenChecker = (req, res, next) => {
     }
 };
 
-// SITE ENDPOINTS
-
 // index page
 app.get('/', tokenChecker, (req, res, next) => {
     const getBooks = axios.get('http://localhost:4000/api/books');
@@ -193,52 +192,49 @@ app.route('/register')
     })
     .post((req, res) => {
         let errors = [];
-        if (!req.body) {
-            if (!req.body.firstname) {
-                errors.push('No First Name specified');
-            }
 
-            if (!req.body.email) {
-                errors.push('No Email specified');
-            }
+        if (!req.body.firstname) {
+            errors.push('No First Name specified');
+        }
 
-            if (!req.body.password) {
-                errors.push('No Password specified');
-            }
+        if (!req.body.email) {
+            errors.push('No Email specified');
+        }
 
-            if (!req.body.rePassword) {
-                errors.push('No RE-Password specified');
-            }
+        if (!req.body.password) {
+            errors.push('No Password specified');
+        }
 
-            if (req.body.password !== req.body.rePassword) {
-                errors.push('Passwords do not match.');
-            }
+        if (!req.body.rePassword) {
+            errors.push('No RE-Password specified');
+        }
 
-            if (!req.body.city) {
-                errors.push('No City specified');
-            }
+        if (req.body.password !== req.body.rePassword) {
+            errors.push('Passwords do not match.');
+        }
 
-            if (!req.body.street) {
-                errors.push('No Street specified');
-            }
+        if (!req.body.city) {
+            errors.push('No City specified');
+        }
 
-            if (!req.body.state) {
-                errors.push('No State specified');
-            }
+        if (!req.body.street) {
+            errors.push('No Street specified');
+        }
 
-            if (!req.body.name) {
-                errors.push('No Name specified');
-            }
+        if (!req.body.state) {
+            errors.push('No State specified');
+        }
 
-            if (!req.body.zip) {
-                errors.push('No Zip specified');
-            }
+        if (!req.body.name) {
+            errors.push('No Name specified');
+        }
 
-            if (!req.body.streetNumber) {
-                errors.push('No Street Number specified');
-            }
-        } else {
-            errors.push('No body specified');
+        if (!req.body.zip) {
+            errors.push('No Zip specified');
+        }
+
+        if (!req.body.streetNumber) {
+            errors.push('No Street Number specified');
         }
 
         if (errors.length) {

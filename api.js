@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const port = 4000;
+const {Op} = require('sequelize');
 
 // Models
 let User = require('./models/user');
@@ -10,11 +11,9 @@ let Book = require('./models/book');
 let BorrowedBook = require('./models/BorrowedBook');
 
 // Relations
-BorrowedBook.hasMany(Book, {foreignKey: 'id', onDelete: 'NO ACTION'});
-Book.hasMany(BorrowedBook, {foreignKey: 'id', onDelete: 'NO ACTION'});
+// @TODO copy relations from server.js
+//
 
-User.hasMany(BorrowedBook, {foreignKey: 'id'});
-BorrowedBook.hasMany(User, {foreignKey: 'id', onDelete: 'NO ACTION'})
 
 // parse requests
 app.use(bodyParser.json());

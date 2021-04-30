@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'db.sqlite',
-    // logging: false @TODO needs to be commented in before release
+    // logging: false // @TODO needs to be commented in before release
 });
 
 // setup Book model and its fields.
