@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AlbsigBay - Book</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+<%- include('nav', {page: 'home'}); %>
+<main class="container">
+    <div class="row mt-3 mb-3">
+        <div class="col col-xs-12">
+            <% if (book) { %>
+                <h1 class="display-4"><%= book.title %></h1>
+                <h1 class="h2"><%= book.isbn %></h1>
+                <img src="/public/books/covers/<%= book.cover %>" alt="<%= book.title %>" width="380px" height="auto">
+                <p class="lead mt-4"><%= book.description %></p>
+                <p class="lead mt-4">
+                    <strong>Autor(en): </strong><%= book.author %>,
+                    <strong>Herausgegeben von: </strong><%= book.vendor %>,
+                    <strong>Auflage: </strong><%= book.publicationDate %>,
+                    <strong>Seiten: </strong><%= book.pages %>,
+                    <strong>Kategorie: </strong><%= book.category.toUpperCase() %>
+                </p>
+                <% if (!isAdmin) { %>
+                    <% if (book.borrowedBook) { %>
+                        <span class="btn btn-danger">Ausgeliehen</span>
+                    <% } else { %>
+                        <button data-book-id="<%= book.id %>" onclick="borrowBook(event, this)" class="btn btn-success">
+                            Verfügbar
+                        </button>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </div>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function borrowBook(e, element) {
+        e.preventDefault();
+        let bookId = element.getAttribute('data-book-id');
+
+        swal({
+                title: "Möchtest du das Buch ausleihen ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-success",
+                confirmButtonText: "Ja, Buch ausleihen!",
+                cancelButtonText: "Abbrechen",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+            function (isConfirm) {
+                if (isConfirm) {
+                    axios.post(`/api/book/borrow/${bookId}/`).then((res) => {
+                        if (res.data.message === 'failure') {
+                            window.location.href = '/login';
+                        } else {
+                            window.location.href = `/profile/${res.data.data.userId}`;
+                        }
+                    });
+                }
+            });
+    }
+
+</script>
+</body>
+</html>

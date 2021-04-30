@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AlbsigBay - Verwaltung</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/public/style.css"/>
+</head>
+<body>
+<%- include('../components/nav', {page: 'admin'}) %>
+<main class="container">
+    <div class="mt-4">
+        <h1>Guten Tag Admin!,&nbsp;<%= user.username %></h1>
+        <div class="row align-items-end mt-5">
+            <div class="col-3">
+                <div class="display-3">Verwaltung</div>
+            </div>
+            <div class="col-5">&nbsp;</div>
+            <div class="col-4">
+                <a class="btn btn-secondary" href="/books/add"><span class="h2">Buch hinzufügen</span></a>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="display-6">Bücher bearbeiten</div>
+        </div>
+    </div>
+    <div class="mt-4">
+        <div id="books" class="container">
+            <% books.forEach(function(book) { %>
+                <div class="card mb-3">
+                    <div class="row mt-3 mb-3">
+                        <div class="col-2 mr-3 col-xs-12">
+                            <a href="/book/<%= book.id %>">
+                                <img src="/public/books/covers/<%= book.cover %>" width="200px"
+                                     height="auto" alt="<%= book.title %>">
+                            </a>
+                        </div>
+                        <div class="col-9 col-xs-12 ms-1 me-0 ps-5 pe-0">
+                            <div class="card-block px-2">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h4 class="card-title" id="title">
+                                            <a href="/book/edit/<%= book.id %>"><%= book.title %></a>
+                                        </h4>
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <p class="card-text" style="text-align: justify"
+                                           id="description"><%= book.description %></p>
+                                    </div>
+                                    <div class="col mt-3 mb-3">
+                                        <span id="author"><%= book.author %></span>
+                                        <span id="isbn"><%= book.isbn %></span>
+                                        <span id="publicationDate"><%= book.publicationDate %></span>
+                                        <span id="vendor"><%= book.vendor %></span>
+                                        <span id="category"><%= book.category %></span>
+                                        <span id="pages"><%= book.pages %></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
