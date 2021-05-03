@@ -11,13 +11,20 @@ let Book = require('./models/book');
 let BorrowedBook = require('./models/BorrowedBook');
 
 // Relations
-// @TODO copy relations from server.js
-//
-
+User.hasMany(BorrowedBook, {onDelete: 'NO ACTION'});
+Book.hasMany(BorrowedBook, {onDelete: 'NO ACTION'});
 
 // parse requests
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+// cors
+app.use((request, response, next) => {
+    response.setHeader("Access-Control-Allow-Origin", "*");
+    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 app.get('/', (req, res, next) => {
    return res.status(404).json({
@@ -52,7 +59,15 @@ app.get('/api/users', (req, res, next) => {
 
 app.get('/api/books', (req, res, next) => {
     Book.findAll({
-        include: [{model: BorrowedBook, required: false}]
+        include: [{
+            model: BorrowedBook,
+            required: false,
+            where: {
+                deletedAt: {
+                    [Op.eq]: null
+                }
+            }
+        }]
     }).then((books) => {
         res.json({
             'message': 'success',
@@ -77,6 +92,9 @@ app.get('/api/categories', (req, res, next) => {
 });
 
 app.put('/api/search', (req, res, next) => {
+    // @TODO fix this shit
+    console.log(req.body.search);
+
     Book.findAll({
         where: {
             [Op.or]: [
@@ -118,6 +136,8 @@ app.put('/api/search', (req, res, next) => {
             ]
         }
     }).then((books) => {
+        console.log(books)
+
         res.json({
             'message': 'success',
             'data': books
@@ -225,42 +245,33 @@ app.delete('/api/user/:id', (req, res, next) => {
 });
 
 app.post('/api/book/borrow/:bookId', (req, res, next) => {
-    if (!app.locals.isAdmin) {
-        if (app.locals.user) {
-            const borrowedBook = {
-                bookId: req.params.bookId,
-                userId: app.locals.user.id,
-            }
+    if (req.body.userId !== '') {
+        const borrowedBook = {
+            bookId: req.params.bookId,
+            userId: req.body.userId,
+        }
 
-            // @TODO write RAW SQL for borrow book
-            BorrowedBook.create(borrowedBook).then(() => {
-                res.json({
-                    'message': 'success',
-                    'data': {
-                        userId: app.locals.user.id
-                    }
-                });
-            }).catch((error) => {
-                res.json({
-                    'message': 'failure',
-                    'data': {
-                        message: error.message
-                    }
-                });
+        // @TODO write RAW SQL for borrow book
+        BorrowedBook.create(borrowedBook).then(() => {
+            res.json({
+                'message': 'success',
+                'data': {
+                    userId: req.body.userId
+                }
             });
-        } else {
+        }).catch((error) => {
             res.json({
                 'message': 'failure',
                 'data': {
-                    message: 'Not logged in!'
+                    message: error.message
                 }
             });
-        }
+        });
     } else {
         res.json({
             'message': 'failure',
             'data': {
-                message: 'Admins can\'t borrow books!'
+                message: 'Not logged in!'
             }
         });
     }

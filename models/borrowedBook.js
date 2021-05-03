@@ -15,7 +15,7 @@ let BorrowedBook = sequelize.define('borrowedBooks', {
     bookId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        unique: true,
+        unique: false,
         onDelete: 'No ACTION',
         references: {
             model: Book,
