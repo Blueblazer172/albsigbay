@@ -93,8 +93,7 @@ app.get('/api/categories', (req, res, next) => {
 
 app.put('/api/search', (req, res, next) => {
     // @TODO fix this shit
-    console.log(req.body.search);
-
+    //console.log(req.body.search);
     Book.findAll({
         where: {
             [Op.or]: [
@@ -134,7 +133,12 @@ app.put('/api/search', (req, res, next) => {
                     }
                 }
             ]
+        },        
+        include: {
+            model: BorrowedBook,
+            required: false,
         }
+
     }).then((books) => {
         console.log(books)
 
