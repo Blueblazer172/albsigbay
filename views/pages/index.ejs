@@ -85,7 +85,7 @@
                                             </div>
                                             <div class="col-4 align-self-end">
                                                 <% if (!isAdmin) {%>
-                                                    <% if (book.borrowedBook) { %>
+                                                    <% if (book.borrowedBooks.length === 1) { %>
                                                         <span class="btn btn-danger">Ausgeliehen</span>
                                                     <% } else { %>
                                                         <button data-book-id="<%= book.id %>" onclick="borrowBook(event, this)" class="btn btn-success">Verfügbar</button>
@@ -147,7 +147,9 @@
             },
             function (isConfirm) {
                 if (isConfirm) {
-                    axios.post(`/api/book/borrow/${bookId}/`).then((res) => {
+                    axios.post(`http://localhost:4000/api/book/borrow/${bookId}/`, {
+                        userId: '<%= (typeof user === 'undefined' || user === null) ? null : user.id %>'
+                    }).then((res) => {
                         if (res.data.message === 'failure') {
                             window.location.href = '/login';
                         } else {

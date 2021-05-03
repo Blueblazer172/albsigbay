@@ -1,3 +1,4 @@
+// Server Endpoints
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -19,11 +20,8 @@ let Book = require('./models/book');
 let BorrowedBook = require('./models/BorrowedBook');
 
 // Relations
-BorrowedBook.hasMany(Book, {foreignKey: 'id', onDelete: 'NO ACTION'});
-Book.hasMany(BorrowedBook, {foreignKey: 'id', onDelete: 'NO ACTION'});
-
-User.hasMany(BorrowedBook, {foreignKey: 'id'});
-BorrowedBook.hasMany(User, {foreignKey: 'id', onDelete: 'NO ACTION'})
+User.hasMany(BorrowedBook, {onDelete: 'NO ACTION'});
+Book.hasMany(BorrowedBook, {onDelete: 'NO ACTION'});
 
 // set template engine to ejs
 app.set('view engine', 'ejs');
@@ -39,6 +37,14 @@ app.use(morgan('dev'));
 // parse requests
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+// cors
+app.use((request, response, next) => {
+    response.setHeader("Access-Control-Allow-Origin", "*");
+    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 // set filter for uploading images
 const fileFilter = (req, file, cb) => {
@@ -121,8 +127,6 @@ let tokenChecker = (req, res, next) => {
     }
 };
 
-// SITE ENDPOINTS
-
 // index page
 app.get('/', tokenChecker, (req, res, next) => {
     const getBooks = axios.get('http://localhost:4000/api/books');
@@ -134,7 +138,8 @@ app.get('/', tokenChecker, (req, res, next) => {
         res.render('pages/index', {
             books: books.data.data,
             categories: categories.data.data,
-            isAdmin: app.locals.isAdmin
+            isAdmin: app.locals.isAdmin,
+            user: app.locals.user
         });
     })).catch(errors => {
         console.error(errors);
@@ -193,52 +198,49 @@ app.route('/register')
     })
     .post((req, res) => {
         let errors = [];
-        if (!req.body) {
-            if (!req.body.firstname) {
-                errors.push('No First Name specified');
-            }
 
-            if (!req.body.email) {
-                errors.push('No Email specified');
-            }
+        if (!req.body.firstname) {
+            errors.push('No First Name specified');
+        }
 
-            if (!req.body.password) {
-                errors.push('No Password specified');
-            }
+        if (!req.body.email) {
+            errors.push('No Email specified');
+        }
 
-            if (!req.body.rePassword) {
-                errors.push('No RE-Password specified');
-            }
+        if (!req.body.password) {
+            errors.push('No Password specified');
+        }
 
-            if (req.body.password !== req.body.rePassword) {
-                errors.push('Passwords do not match.');
-            }
+        if (!req.body.rePassword) {
+            errors.push('No RE-Password specified');
+        }
 
-            if (!req.body.city) {
-                errors.push('No City specified');
-            }
+        if (req.body.password !== req.body.rePassword) {
+            errors.push('Passwords do not match.');
+        }
 
-            if (!req.body.street) {
-                errors.push('No Street specified');
-            }
+        if (!req.body.city) {
+            errors.push('No City specified');
+        }
 
-            if (!req.body.state) {
-                errors.push('No State specified');
-            }
+        if (!req.body.street) {
+            errors.push('No Street specified');
+        }
 
-            if (!req.body.name) {
-                errors.push('No Name specified');
-            }
+        if (!req.body.state) {
+            errors.push('No State specified');
+        }
 
-            if (!req.body.zip) {
-                errors.push('No Zip specified');
-            }
+        if (!req.body.name) {
+            errors.push('No Name specified');
+        }
 
-            if (!req.body.streetNumber) {
-                errors.push('No Street Number specified');
-            }
-        } else {
-            errors.push('No body specified');
+        if (!req.body.zip) {
+            errors.push('No Zip specified');
+        }
+
+        if (!req.body.streetNumber) {
+            errors.push('No Street Number specified');
         }
 
         if (errors.length) {
@@ -341,7 +343,8 @@ app.get('/search/:query', (req, res, next) => {
                     res.render('pages/index', {
                         books: filteredBooks.data.data,
                         categories: categories.data.data,
-                        isAdmin: app.locals.isAdmin
+                        isAdmin: app.locals.isAdmin,
+                        user: app.locals.user
                     });
                 });
             } else {
@@ -373,7 +376,8 @@ app.get('/books/cat/:category', (req, res, next) => {
                 categories: [
                     {category: req.params.category}
                 ],
-                isAdmin: app.locals.isAdmin
+                isAdmin: app.locals.isAdmin,
+                user: app.locals.user
             });
         }
     });
@@ -403,7 +407,7 @@ app.route('/books/add')
             cover: file.filename
         };
 
-        Book.create(book).then((res) => {
+        Book.create(book).then(() => {
             res.redirect('/admin');
         }).catch((error) => {
             console.error(error.message)
@@ -421,13 +425,6 @@ app.get('/book/edit/:id', (req, res, next) => {
 });
 
 app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
-    const file = req.file;
-    if (!file) {
-        const error = new Error('Bitte eine Datei hochladen!');
-        error.httpStatusCode = 400;
-        return next(error);
-    }
-
     const formValues = {
         title: req.body.title,
         isbn: req.body.isbn,
@@ -437,7 +434,7 @@ app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
         category: req.body.category.toLowerCase(),
         vendor: req.body.vendor,
         publicationDate: req.body.publicationDate,
-        cover: file.filename
+        cover: req.file ? req.file.filename: req.body.cover
     };
 
     let updatedValuesForModel = [];

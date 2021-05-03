@@ -5,7 +5,7 @@ let bcrypt = require('bcrypt');
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'db.sqlite',
-    // logging: false @TODO needs to be commented in before release
+    // logging: false // @TODO needs to be commented in before release
 });
 
 // setup User model and its fields.

@@ -7,7 +7,7 @@ const User = require('./user');
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'db.sqlite',
-    // logging: false @TODO needs to be commented in before release
+    // logging: false // @TODO needs to be commented in before release
 });
 
 // setup Book model and its fields.
@@ -15,7 +15,7 @@ let BorrowedBook = sequelize.define('borrowedBooks', {
     bookId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        unique: true,
+        unique: false,
         onDelete: 'No ACTION',
         references: {
             model: Book,
