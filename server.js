@@ -396,6 +396,7 @@ app.get('/books/cat/:category', (req, res, next) => {
                 books: books,
                 isAdmin: app.locals.isAdmin,
                 user: app.locals.user,
+                moment: moment,
                 categories: [
                     {category: req.params.category}
                 ]
