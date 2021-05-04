@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AlbsigBay - Book</title>
+    <title>AlbsigBay - <%= book ? book.title: 'Buch' %></title>
+    <link rel="icon" type="image/png" href="/public/favicon.png"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.css">
@@ -27,8 +28,12 @@
                     <strong>Kategorie: </strong><%= book.category.toUpperCase() %>
                 </p>
                 <% if (!isAdmin) { %>
-                    <% if (book.borrowedBook) { %>
-                        <span class="btn btn-danger">Ausgeliehen</span>
+                    <% if (book.borrowedBooks.length === 1) { %>
+                        <span class="btn btn-danger"
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="Verfügbar am: <%= moment(book.borrowedBooks[0].returnDate).format('DD-MM-YYYY') %>"
+                        >Ausgeliehen</span>
                     <% } else { %>
                         <button data-book-id="<%= book.id %>" onclick="borrowBook(event, this)" class="btn btn-success">
                             Verfügbar
@@ -39,10 +44,18 @@
         </div>
     </div>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    window.onload = () => {
+        // bootstrap tooltips
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    }
+
     function borrowBook(e, element) {
         e.preventDefault();
         let bookId = element.getAttribute('data-book-id');
@@ -59,7 +72,9 @@
             },
             function (isConfirm) {
                 if (isConfirm) {
-                    axios.post(`/api/book/borrow/${bookId}/`).then((res) => {
+                    axios.post(`http://localhost:4000/api/book/borrow/${bookId}/`, {
+                        userId: '<%= (typeof user === 'undefined' || user === null) ? null : user.id %>'
+                    }).then((res) => {
                         if (res.data.message === 'failure') {
                             window.location.href = '/login';
                         } else {
@@ -69,7 +84,6 @@
                 }
             });
     }
-
 </script>
 </body>
 </html>
