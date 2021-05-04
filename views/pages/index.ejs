@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AlbsigBay - Home</title>
+    <link rel="icon" type="image/png" href="/public/favicon.png"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.css">
@@ -86,7 +87,11 @@
                                             <div class="col-4 align-self-end">
                                                 <% if (!isAdmin) {%>
                                                     <% if (book.borrowedBooks.length === 1) { %>
-                                                        <span class="btn btn-danger">Ausgeliehen</span>
+                                                        <span class="btn btn-danger"
+                                                              data-toggle="tooltip"
+                                                              data-placement="top"
+                                                              title="Verfügbar am: <%= moment(book.borrowedBooks[0].returnDate).format('DD-MM-YYYY') %>"
+                                                        >Ausgeliehen</span>
                                                     <% } else { %>
                                                         <button data-book-id="<%= book.id %>" onclick="borrowBook(event, this)" class="btn btn-success">Verfügbar</button>
                                                     <% } %>
@@ -107,12 +112,18 @@
         </div>
     <% } %>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     window.onload = () => {
+        // bootstrap tooltips
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
         // set focus after load on search
         document.getElementById('search').focus();
 

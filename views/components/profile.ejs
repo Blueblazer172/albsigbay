@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AlbsigBay - Home</title>
+    <title>AlbsigBay - Profil</title>
+    <link rel="icon" type="image/png" href="/public/favicon.png"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.css">
@@ -93,13 +94,11 @@
                                                                 <span>
                                                                     <strong>Ausgeliehen am:
                                                                         <%= moment(borrowedBook.borrowedDate).format('DD-MM-YYYY') %>
-                                                                        um:
-                                                                        <%= moment(borrowedBook.borrowedDate).format('hh:mm:ss') %>
                                                                     </strong>
                                                                 </span>
                                                                 <br>
                                                                 <span>
-                                                                    <strong>Zurückzugeben bis spätestens: <%= moment(borrowedBook.returnDate).format('DD-MM-YYYY hh:mm:ss') %></strong>
+                                                                    <strong>Zurückzugeben bis spätestens: <%= moment(borrowedBook.returnDate).format('DD-MM-YYYY') %></strong>
                                                                 </span>
                                                             </p>
                                                         </div>
@@ -240,7 +239,13 @@
             },
             function (isConfirm) {
                 if (isConfirm) {
-                    axios.delete(`/api/book/return/${bookId}/`).then((res) => {
+                    let userId = '<%= (typeof user === 'undefined' || false) ? null: user.id %>';
+
+                    axios.delete(`http://localhost:4000/api/book/return/${bookId}/`, {
+                        data: {
+                            userId: userId
+                        }
+                    }).then((res) => {
                         if (res.data.message === 'failure') {
                             window.location.href = '/login';
                         } else {

@@ -92,8 +92,6 @@ app.get('/api/categories', (req, res, next) => {
 });
 
 app.put('/api/search', (req, res, next) => {
-    // @TODO fix this shit
-    //console.log(req.body.search);
     Book.findAll({
         where: {
             [Op.or]: [
@@ -138,10 +136,7 @@ app.put('/api/search', (req, res, next) => {
             model: BorrowedBook,
             required: false,
         }
-
     }).then((books) => {
-        console.log(books)
-
         res.json({
             'message': 'success',
             'data': books
@@ -187,7 +182,14 @@ app.get('/api/user/:id/books', (req, res, next) => {
             model: BorrowedBook,
             required: true,
             where: {
-                userId: req.params.id
+                userId: req.params.id,
+                [Op.or]: [
+                    {
+                        deletedAt: {
+                            [Op.eq]: null
+                        }
+                    }
+                ]
             }
         }]
     }).then((borrowedBooks) => {
@@ -212,12 +214,16 @@ app.get('/api/user/:id/books/history', (req, res, next) => {
         include: [{
             model: BorrowedBook,
             required: true,
-            paranoid: false, // get only soft-deleted rows
+            paranoid: false,
             where: {
-                userId: req.params.id
+                userId: req.params.id,
+                deletedAt: {
+                    [Op.ne]: null
+                }
             }
         }]
     }).then((borrowedBooks) => {
+        console.log(borrowedBooks)
         if (!borrowedBooks || borrowedBooks.length <= 0) {
             res.json({
                 'message': 'failure',
@@ -255,7 +261,6 @@ app.post('/api/book/borrow/:bookId', (req, res, next) => {
             userId: req.body.userId,
         }
 
-        // @TODO write RAW SQL for borrow book
         BorrowedBook.create(borrowedBook).then(() => {
             res.json({
                 'message': 'success',
@@ -282,14 +287,13 @@ app.post('/api/book/borrow/:bookId', (req, res, next) => {
 });
 
 app.delete('/api/book/return/:bookId', (req, res, next) => {
-    // check if user is really the user who borrowed the book
-    if (app.locals.user && parseInt(app.locals.user.id) === parseInt(req.params.id)) {
-        // @TODO write RAW SQL for return book
-        BorrowedBook.destroy({where: {bookId: req.params.bookId, userId: app.locals.user.id}}).then(() => {
+    // @TODO check if user is really the user who borrowed the book
+    if (req.body.userId) {
+        BorrowedBook.destroy({where: {bookId: req.params.bookId, userId: req.body.userId}}).then(() => {
             res.json({
                 'message': 'success',
                 'data': {
-                    userId: app.locals.user.id
+                    userId: req.body.userId
                 }
             });
         }).catch((error) => {

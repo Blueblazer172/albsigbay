@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AlbsigBay - Login</title>
+    <link rel="icon" type="image/png" href="/public/favicon.png"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="/public/style.css"/>
@@ -14,25 +15,24 @@
     <div class="mt-3">
         <h1 class="display-1">Login</h1>
         <hr>
-        <form action="/login" method="post" id="loginForm">
-            <div class="row align-items-center">
-                <div class="col-1">
-                    <label for="emailOrUsername" class="col-form-label">Email oder Username:</label>
-                </div>
-                <div class="col-3">
-                    <input type="text" name="emailOrUsername" id="emailOrUsername" class="form-control">
+        <form action="/login" method="post" class="row g-3 form-validation" id="loginForm">
+            <div class="col-md-4">
+                <label for="emailOrUsername" class="form-label">Email oder Username</label>
+                <input type="text" class="form-control" name="emailOrUsername" id="emailOrUsername" required>
+                <div class="invalid-feedback">
+                    Bitte Email oder Username eingeben.
                 </div>
             </div>
-            <div class="row mt-3 align-items-center">
-                <div class="col-1">
-                    <label for="password" class="col-form-label">Password:</label>
+            <div class="col-md-4">
+                <label for="password" class="form-label">Passwort</label>
+                <input type="password" class="form-control" name="password" id="password" required>
+                <div class="invalid-feedback">
+                    Bitte Passwort eingeben.
                 </div>
-                <div class="col-3">
-                    <input type="password" name="password" id="password" class="form-control">
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-secondary">Abschicken</button>
-                </div>
+            </div>
+            <div class="col-4"></div>
+            <div class="col-4">
+                <button type="submit" class="btn btn-secondary">Abschicken</button>
             </div>
         </form>
         <div class="h4 mt-5">

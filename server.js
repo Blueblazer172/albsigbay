@@ -135,11 +135,13 @@ app.get('/', tokenChecker, (req, res, next) => {
     axios.all([getBooks, getCategories]).then(axios.spread((...responses) => {
         const books = responses[0];
         const categories = responses[1];
+
         res.render('pages/index', {
             books: books.data.data,
             categories: categories.data.data,
             isAdmin: app.locals.isAdmin,
-            user: app.locals.user
+            user: app.locals.user,
+            moment: moment
         });
     })).catch(errors => {
         console.error(errors);
@@ -148,7 +150,7 @@ app.get('/', tokenChecker, (req, res, next) => {
 
 // route for user login
 app.route('/login')
-    .get((req, res) => {
+    .get(tokenChecker, (req, res) => {
         res.render('pages/login');
     })
     .post((req, res) => {
@@ -193,7 +195,7 @@ app.route('/login')
 
 // route for user registration
 app.route('/register')
-    .get((req, res) => {
+    .get(tokenChecker, (req, res, next) => {
         res.render('pages/register');
     })
     .post((req, res) => {
@@ -300,6 +302,7 @@ app.get('/profile/:id', tokenChecker, (req, res) => {
 
             let userValues = user.data.data;
             ['password', 'registerDate', 'createdAt', 'updatedAt'].forEach(e => delete userValues[e]);
+
             res.render('components/profile', {
                 user: user.data.data,
                 books: borrowedBooks.data.data,
@@ -344,7 +347,8 @@ app.get('/search/:query', (req, res, next) => {
                         books: filteredBooks.data.data,
                         categories: categories.data.data,
                         isAdmin: app.locals.isAdmin,
-                        user: app.locals.user
+                        user: app.locals.user,
+                        moment: moment
                     });
                 });
             } else {
@@ -357,27 +361,44 @@ app.get('/search/:query', (req, res, next) => {
 });
 
 app.get('/book/:id', (req, res, next) => {
-    Book.findOne({where: {id: req.params.id}}).then((book) => {
+    Book.findOne({
+        where: {id: req.params.id},
+        include: {
+            model: BorrowedBook,
+            required: false,
+        }
+    }).then((book) => {
         if (!book) {
             res.redirect('/');
         } else {
-            res.render('components/book', {book: book, isAdmin: app.locals.isAdmin});
+            res.render('components/book', {
+                book: book,
+                isAdmin: app.locals.isAdmin,
+                user: app.locals.user,
+                moment: moment
+            });
         }
     });
 });
 
 app.get('/books/cat/:category', (req, res, next) => {
-    Book.findAll({where: {category: req.params.category}}).then((books) => {
+    Book.findAll({
+        where: {category: req.params.category},
+        include: {
+            model: BorrowedBook,
+            required: false,
+        }
+    }).then((books) => {
         if (!books) {
             res.redirect('/');
         } else {
             res.render('pages/index', {
                 books: books,
+                isAdmin: app.locals.isAdmin,
+                user: app.locals.user,
                 categories: [
                     {category: req.params.category}
-                ],
-                isAdmin: app.locals.isAdmin,
-                user: app.locals.user
+                ]
             });
         }
     });
