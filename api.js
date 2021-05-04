@@ -223,7 +223,6 @@ app.get('/api/user/:id/books/history', (req, res, next) => {
             }
         }]
     }).then((borrowedBooks) => {
-        console.log(borrowedBooks)
         if (!borrowedBooks || borrowedBooks.length <= 0) {
             res.json({
                 'message': 'failure',
