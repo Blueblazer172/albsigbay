@@ -14,11 +14,73 @@
 <main class="container">
     <div class="mt-3">
         <h1 class="display-1">FAQ</h1>
-        <div class="wide-text text mt-3">
-            <h2>Wie lange ist das Buch für mich reserviert?</h2>
-            <p>Das Buch liegt für 4 Tage in der Bibliothek für Sie reserviert. Danach wird das Buch wieder über unser System freigegeben!</p>
-            <h2>Wie kann ich mir einen Account anlegen?</h2>
-            <p>Um sich zu registrieren klicken Sie entweder <a href="/register">hier</a> oder gehen Sie auf "Login" und klicken dann auf den Link "Registrieren"</p>
+        <div class="accordion accordion-flush" id="accordionUpdateProfile">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-headingOne">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                        <span class="display-6">Für wie lange werden Bücher standardmäßig ausgeliehen</span>
+                    </button>
+                </h2>
+                <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
+                     data-bs-parent="#accordionUpdateProfile">
+                    <div class="accordion-body">
+                        <p>Bücher werden Standardmäßig  für vier Wochen ausgeliehen können aber auch verlängert werden. </p>
+                    </div>
+                </div>
+
+                <h2 class="accordion-header" id="flush-headingTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                        <span class="display-6">Kann ich die Ausleihe verlängern und für wie lange?</span>
+                    </button>
+                </h2>
+                <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo"
+                     data-bs-parent="#accordionUpdateProfile">
+                    <div class="accordion-body">
+                        <p>Die Ausleihe kann zwei Mal um bis zu vier Wochen verlängert werden.</p>
+                    </div>
+                </div>
+
+                <h2 class="accordion-header" id="flush-headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+                        <span class="display-6">Kann ich sehen wie lange ich ein Buch noch ausgeliehen habe?</span>
+                    </button>
+                </h2>
+                <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree"
+                     data-bs-parent="#accordionUpdateProfile">
+                    <div class="accordion-body">
+                        <p>Das Ende der Ausleihe Dauer wird direkt nach dem Login angezeigt.</p>
+                    </div>
+                </div>
+
+                <h2 class="accordion-header" id="flush-headingFour">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseFour" aria-expanded="false" aria-controls="flush-collapseFour">
+                        <span class="display-6">Kann ich sehen welche Bücher ich ausgeliehen habe?</span>
+                    </button>
+                </h2>
+                <div id="flush-collapseFour" class="accordion-collapse collapse" aria-labelledby="flush-headingFour"
+                     data-bs-parent="#accordionUpdateProfile">
+                    <div class="accordion-body">
+                        <p>Die Anzahl der ausgeliehenen Bücher wir direkt nach dem Login gezeigt.</p>
+                    </div>
+                </div>
+
+                <h2 class="accordion-header" id="flush-headingFive">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseFive" aria-expanded="false" aria-controls="flush-collapseFive">
+                        <span class="display-6">Was ist wenn ich die Abgabefrist verpasse?</span>
+                    </button>
+                </h2>
+                <div id="flush-collapseFive" class="accordion-collapse collapse" aria-labelledby="flush-headingFive"
+                     data-bs-parent="#accordionUpdateProfile">
+                    <div class="accordion-body">
+                        <p>Wenn sie die Abgabefrist verpassen müssen sie bei der Rückgabe eine Gebühr von 50ct pro angefangener Woche Zahlen.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
