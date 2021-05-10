@@ -307,6 +307,7 @@ app.get('/profile/:id', tokenChecker, (req, res) => {
                 user: user.data.data,
                 books: borrowedBooks.data.data,
                 booksHistory: borrowedBooksHistory.data.data,
+                hasBorrowedBooks: borrowedBooks.data.data.length > 0,
                 moment: moment
             });
         })).catch(errors => {
@@ -476,6 +477,29 @@ app.post('/book/update/:id', upload.single('cover'), (req, res, next) => {
     });
 });
 
+app.post('/profile/address/:id', (req, res, next) => {
+    User.findOne({where: {id: req.params.id}}).then((user) => {
+        if (!user) {
+            res.json({
+                'message': 'failure',
+                'data': null
+            });
+        } else {
+            User.update({
+                city: req.body.city,
+                state: req.body.state,
+                zip: req.body.zip,
+                street: req.body.street,
+                streetNumber: req.body.streetNumber,
+            }, {
+                where: {id: req.params.id}
+            }).then(() => {
+                res.redirect(`/profile/${req.params.id}`);
+            });
+        }
+    });
+});
+
 app.post('/profile/name/:id', (req, res, next) => {
     User.findOne({where: {id: req.params.id}}).then((user) => {
         if (!user) {
@@ -484,7 +508,44 @@ app.post('/profile/name/:id', (req, res, next) => {
                 'data': null
             });
         } else {
-            User.update({firstname: req.body.firstname, name: req.body.name}, {where: {id: req.params.id}})
+            let postValues = {
+                firstname: req.body.firstname,
+                name: req.body.name
+            }
+
+            if (req.body.username) {
+                postValues = {...postValues, username: req.body.username}
+            }
+
+            User.update(postValues, {where: {id: req.params.id}}).then(() => {
+                res.redirect(`/profile/${req.params.id}`);
+            });
+        }
+    });
+});
+
+app.post('/profile/email/:id', (req, res, next) => {
+    let errors = [];
+
+    // check if newEmail is reNewEmail
+    if (req.body.newEmail !== req.body.reNewEmail) {
+        errors.push('reNewEmail is not the same as newEmail');
+    }
+
+    if (errors.length) {
+        // @TODO render errors in template
+        res.status(400).json({'error': errors.join(', ')});
+        return;
+    }
+
+    User.findOne({where: {id: req.params.id}}).then((user) => {
+        if (!user) {
+            res.json({
+                'message': 'failure',
+                'data': null
+            });
+        } else {
+            User.update({email: req.body.newEmail}, {where: {id: req.params.id}})
                 .then(() => {
                     res.redirect(`/profile/${req.params.id}`);
                 });
@@ -507,12 +568,6 @@ app.post('/profile/password/:id', (req, res, next) => {
                 errors.push('oldPassword is not current user password');
             }
 
-            // check for password has changed from old password
-            // @TODO fix this bug not working as expected
-            // if (user.validPassword(req.body.oldPassword) === user.validPassword(req.body.newPassword)) {
-            //     errors.push('oldPassword cannot be the new password');
-            // }
-
             // check if newPassword is reNewPassword
             if (req.body.newPassword !== req.body.reNewPassword) {
                 errors.push('reNewPassword is not the same as newPassword');
@@ -526,6 +581,7 @@ app.post('/profile/password/:id', (req, res, next) => {
 
             // generate hash for newPassword and update password column in user table
             let newPassword = await user.generateHash(req.body.newPassword);
+
             User.update({password: newPassword}, {where: {id: req.params.id}}).then(() => {
                 // logout user after successful changed password
                 res.redirect('/logout');
