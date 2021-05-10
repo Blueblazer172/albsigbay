@@ -19,12 +19,27 @@ and
 node api.js
 ```
 # Demodaten
-### Admin Account für Bücherverwaltung
-username: admin <br>
-passwort: admin
-### User Account 1 für Bücherausleihe
-username: testuser <br>
-passwort: Test1234
-### User Account 2 für Bücherausleihe
-username: testuser2 <br>
-passwort: Test12345
+>### Admin Account für Bücherverwaltung
+>>username: admin <br>
+>>passwort: admin
+> - kann Bücher hinzufügen
+> - kann Bücher bearbeiten
+
+>### User Account 1 für Bücherausleihe
+>> username: testuser <br>
+>> password: Test1234
+>- ##### Hat 3 ausgeliehene Bücher
+>- ##### Hat 5 vorher ausgeliehene Bücher
+
+>### User Account 2 für Bücherausleihe
+>> username: testuser2 <br>
+>> password: Test12345
+>- ##### Hat 1 ausgeliehenes Buch
+>- ##### Hat 1 vorher ausgeliehenes Buch
+
+>### User Account 3 für Bücherausleihe
+>> username: testuser3 <br>
+>> password: Test123456
+>- ##### Hat keine ausgeliehene Bücher
+>- ##### Hat 1 vorher ausgeliehenes Bücher
+>- ##### Kann seinen Account löschen

@@ -240,13 +240,11 @@ app.get('/api/user/:id/books/history', (req, res, next) => {
 });
 
 app.delete('/api/user/:id', (req, res, next) => {
-    // check if user is actually the user who wants to delete its profile
-    if (app.locals.user && parseInt(app.locals.user.id) === parseInt(req.params.id)) {
+    // @TODO check if user is actually the user who wants to delete its profile
+    if (req.params.id !== '') {
         // soft delete user
         User.destroy({where: {id: req.params.id}}).then(() => {
-            // @TODO fix relations when user deleted profile
-            BorrowedBook.destroy({where: {userId: req.params.id}});
-            res.redirect(303, '/logout');
+            res.redirect(303, 'http://localhost:3000/logout');
         });
     } else {
         res.redirect('/');

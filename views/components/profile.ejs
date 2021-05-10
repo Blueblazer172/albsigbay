@@ -13,12 +13,244 @@
 <body>
 <%- include('../components/nav', {page: 'profile'}) %>
 <main class="container">
-    <div class="mt-3">
+    <div class="mt-5">
+        <h1 class="display-4">Profil bearbeiten:</h1>
+        <hr>
+        <div class="accordion accordion-flush" id="accordionUpdateProfile">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-headingOne">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                        <span class="display-6">Name und Username Ändern</span>
+                    </button>
+                </h2>
+                <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
+                     data-bs-parent="#accordionUpdateProfile">
+                    <div class="accordion-body">
+                        <form action="/profile/name/<%= user.id %>/" id="updateNameForm" method="post" class="row g-3" novalidate>
+                            <div class="col-md-3">
+                                <label for="firstname" class="form-label">Vorname</label>
+                                <input type="text" class="form-control"
+                                       value="<%= user.firstname %>" required
+                                       name="firstname" id="firstname">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="name" class="form-label">Nachname</label>
+                                <input type="text" class="form-control"
+                                       value="<%= user.name %>" required
+                                       name="name" id="name">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="username" class="form-label">
+                                    Username <%= user.username ? '' : '(Bisher noch keinen gesetzt)' %>
+                                </label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text">@</span>
+                                    <input type="text" class="form-control" required
+                                           value="<%= user.username ? user.username : '' %>"
+                                           name="username" id="username">
+                                </div>
+                            </div>
+                            <div class="col-md-1"></div>
+                            <div class="col-md-2">
+                                <label for="updateName" class="form-label">&nbsp;</label>
+                                <input type="submit" class="btn btn-success form-control"
+                                       value="Aktualisieren" name="updateName" id="updateName">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-headingTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                        <span class="display-6">Adresse Ändern</span>
+                    </button>
+                </h2>
+                <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo"
+                     data-bs-parent="#accordionUpdateProfile">
+                    <div class="accordion-body">
+                        <form action="/profile/address/<%= user.id %>/" id="updateAddressForm" method="post" class="row g-3"
+                              novalidate>
+                            <div class="col-md-5">
+                                <label for="city" class="form-label">Stadt</label>
+                                <input type="text" class="form-control" value="<%= user.city %>" required name="city" id="city">
+                                <div class="invalid-feedback">
+                                    Bitte Stadt eingeben.
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="state" class="form-label">State</label>
+                                <select class="form-select" name="state" id="state">
+                                    <option selected disabled value="">Wählen...</option>
+                                    <option value="Baden-Württemberg">Baden-Württemberg</option>
+                                    <option value="Bayern">Bayern</option>
+                                    <option value="Berlin">Berlin</option>
+                                    <option value="Brandenburg">Brandenburg</option>
+                                    <option value="Bremen">Bremen</option>
+                                    <option value="Hamburg">Hamburg</option>
+                                    <option value="Hessen">Hessen</option>
+                                    <option value="Mecklenburg-Vorpommern">Mecklenburg-Vorpommern</option>
+                                    <option value="Niedersachsen">Niedersachsen</option>
+                                    <option value="Nordrhein-Westfalen">Nordrhein-Westfalen</option>
+                                    <option value="Rheinland-Pfalz">Rheinland-Pfalz</option>
+                                    <option value="Saarland">Saarland</option>
+                                    <option value="Sachsen">Sachsen</option>
+                                    <option value="Sachsen-Anhalt">Sachsen-Anhalt</option>
+                                    <option value="Schleswig-Holstein">Schleswig-Holstein</option>
+                                    <option value="Thüringen">Thüringen</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Bitte Bundesland wählen.
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="zip" class="form-label">Postleitzahl</label>
+                                <input type="text" class="form-control" name="zip" id="zip"
+                                       value="<%= user.zip %>" required
+                                       pattern="^(?!01000|99999)(0[1-9]\d{3}|[1-9]\d{4})$">
+                                <div class="invalid-feedback">
+                                    Bitte Postleitzahl (PLZ) eingeben.
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="street" class="form-label">Straße</label>
+                                <input type="text" class="form-control"
+                                       value="<%= user.street %>" required
+                                       name="street" id="street">
+                                <div class="invalid-feedback">
+                                    Bitte Stadt eingeben.
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <label for="streetNumber" class="form-label">Hausnummer</label>
+                                <input type="text" class="form-control"
+                                       value="<%= user.streetNumber %>" required
+                                       name="streetNumber" id="streetNumber" pattern="\d+">
+                                <div class="invalid-feedback">
+                                    Bitte Hausnummer eingeben.
+                                </div>
+                            </div>
+                            <div class="col-md-4"></div>
+                            <div class="col-md-2">
+                                <label for="updateAddress" class="form-label">&nbsp;</label>
+                                <input type="submit" class="btn btn-success form-control"
+                                       value="Aktualisieren" name="updateAddress" id="updateAddress">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+                        <span class="display-6">Email Ändern</span>
+                    </button>
+                </h2>
+                <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree"
+                     data-bs-parent="#accordionUpdateProfile">
+                    <div class="accordion-body">
+                        <form action="/profile/email/<%= user.id %>/" id="updateEmailForm" method="post"
+                              class="row g-3 form-validation" novalidate>
+                            <div class="col-md-4">
+                                <label for="newEmail" class="form-label">Neue Email</label>
+                                <input type="email" class="form-control"
+                                       pattern="^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$"
+                                       value="<%= user.email %>" required
+                                       name="newEmail" id="newEmail">
+                                <div class="invalid-feedback">
+                                    Bitte Email eingeben.
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="reNewEmail" class="form-label">Neue Email bestätigen</label>
+                                <input type="email" class="form-control"
+                                       pattern="^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$"
+                                       value="<%= user.email %>" required
+                                       name="reNewEmail" id="reNewEmail">
+                                <div class="invalid-feedback">
+                                    Bitte neue Email bestätigen.
+                                </div>
+                            </div>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2">
+                                <label for="updateEmail" class="form-label">&nbsp;</label>
+                                <input type="submit" class="btn btn-success form-control" value="Aktualisieren"
+                                       name="updateEmail" id="updateEmail">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-headingFour">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseFour" aria-expanded="false" aria-controls="flush-collapseFour">
+                        <span class="display-6">Password Ändern</span>
+                    </button>
+                </h2>
+                <div id="flush-collapseFour" class="accordion-collapse collapse" aria-labelledby="flush-headingFour"
+                     data-bs-parent="#accordionUpdateProfile">
+                    <div class="accordion-body">
+                        <form action="/profile/password/<%= user.id %>/" id="updatePasswordForm" method="post"
+                              class="row g-3 form-validation" novalidate>
+                            <div class="col-md-4">
+                                <label for="oldPassword" class="form-label">Altes Passwort</label>
+                                <input type="password" class="form-control" name="oldPassword" id="oldPassword" required>
+                                <div class="invalid-feedback">
+                                    Bitte Password eingeben.
+                                </div>
+                            </div>
+                            <div class="col-md-8"></div>
+                            <div class="col-md-4">
+                                <label for="newPassword" class="form-label">Neues Passwort</label>
+                                <input type="password" class="form-control" name="newPassword" id="newPassword" required>
+                                <div class="invalid-feedback">
+                                    Bitte Passwort eingeben.
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="reNewPassword" class="form-label">Neues Passwort bestätigen</label>
+                                <input type="password" class="form-control" name="reNewPassword" id="reNewPassword" required>
+                                <div class="invalid-feedback">
+                                    Bitte neues Passwort bestätigen.
+                                </div>
+                            </div>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2">
+                                <label for="updatePassword" class="form-label">&nbsp;</label>
+                                <input type="submit" class="btn btn-success form-control" value="Aktualisieren"
+                                       name="updatePassword" id="updatePassword">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2 mb-4">
+            <form class="row g-3" novalidate>
+                <div class="col-12">
+                    <% if (!hasBorrowedBooks) {%>
+                        <button class="btn btn-danger" type="submit" id="deleteUserButton">Account Löschen</button>
+                    <% } else { %>
+                        <button class="btn btn-danger" style="opacity: 0.5;"
+                                data-toggle="tooltip" data-placement="top"
+                                title="Ausgeliehene Bücher müssen erst zurückgeben werden!"
+                                onclick="return false;"
+                        >Account Löschen</button>
+                    <% } %>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="mt-5">
         <% if (!user.isAdmin) { %>
             <div class="row">
                 <h1 class="display-4">Ausgeliehene Bücher:</h1>
                 <hr>
-<!--                Currently borrowed Books-->
+                <!--                Currently borrowed Books-->
                 <% if (typeof books.message === 'undefined') { %>
                     <div class="mt-4">
                         <div id="books" class="container">
@@ -52,7 +284,10 @@
                                                             </p>
                                                         </div>
                                                         <div class="col-12 mt-3">
-                                                            <button data-book-id="<%= book.id %>" onclick="returnBook(event, this)" class="btn btn-warning">Buch Zurückgeben</button>
+                                                            <button data-book-id="<%= book.id %>"
+                                                                    onclick="returnBook(event, this)"
+                                                                    class="btn btn-warning">Buch Zurückgeben
+                                                            </button>
                                                         </div>
                                                     <% }); %>
                                                 </div>
@@ -68,7 +303,7 @@
                 <% } %>
                 <br>
                 <br>
-<!--                Book History-->
+                <!--                Book History-->
                 <% if (typeof booksHistory.message === 'undefined') { %>
                     <h1 class="display-4">Vergange Ausleihen:</h1>
                     <hr>
@@ -78,7 +313,8 @@
                                 <div class="card mb-3" style="opacity: 50%">
                                     <div class="row mt-3 mb-3">
                                         <div class="col-2 mr-3 col-xs-12">
-                                            <img src="/public/books/covers/<%= book.cover %>" width="200px" height="auto" alt="<%= book.title %>">
+                                            <img src="/public/books/covers/<%= book.cover %>" width="200px"
+                                                 height="auto" alt="<%= book.title %>">
                                         </div>
                                         <div class="col-9 col-xs-12 ms-1 me-0 ps-5 pe-0">
                                             <div class="card-block px-2">
@@ -114,75 +350,19 @@
                 <% } %>
             </div>
         <% } %>
-        <div class="row mt-2">
-            <form action="/profile/name/<%= user.id %>/" id="updateNameForm" method="post" class="row g-3" novalidate>
-                <h1 class="display-4">Profil Einstellen</h1>
-                <hr>
-                <h1 class="display-6">Name Ändern</h1>
-                <div class="col-md-4">
-                    <label for="firstname" class="form-label">Vorname</label>
-                    <input type="text" class="form-control" value="<%= user.firstname %>" name="firstname"
-                           id="firstname">
-                </div>
-                <div class="col-md-4">
-                    <label for="name" class="form-label">Nachname</label>
-                    <input type="text" class="form-control" value="<%= user.name %>" name="name" id="name">
-                </div>
-                <div class="col-md-2">
-                    <label for="updateName" class="form-label">&nbsp;</label>
-                    <input type="submit" class="btn btn-success form-control" value="Aktualisieren" name="updateName"
-                           id="updateName">
-                </div>
-            </form>
-        </div>
-        <div class="row mt-2">
-            <form action="/profile/password/<%= user.id %>/" id="updatePasswordForm" method="post"
-                  class="row g-3 form-validation" novalidate>
-                <hr>
-                <h1 class="display-6">Password Ändern</h1>
-                <div class="col-md-4">
-                    <label for="oldPassword" class="form-label">Altes Passwort</label>
-                    <input type="password" class="form-control" name="oldPassword" id="oldPassword" required>
-                    <div class="invalid-feedback">
-                        Bitte Password eingeben.
-                    </div>
-                </div>
-                <div class="col-md-8"></div>
-                <div class="col-md-4">
-                    <label for="newPassword" class="form-label">Neues Passwort</label>
-                    <input type="password" class="form-control" name="newPassword" id="newPassword" required>
-                    <div class="invalid-feedback">
-                        Bitte Passwort eingeben.
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <label for="reNewPassword" class="form-label">Neues Passwort bestätigen</label>
-                    <input type="password" class="form-control" name="reNewPassword" id="reNewPassword" required>
-                    <div class="invalid-feedback">
-                        Bitte neues Passwort bestätigen.
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <label for="updatePassword" class="form-label">&nbsp;</label>
-                    <input type="submit" class="btn btn-success form-control" value="Aktualisieren">
-                </div>
-            </form>
-        </div>
-        <div class="row mt-2">
-            <form class="row g-3" novalidate>
-                <hr>
-                <div class="col-12">
-                    <button class="btn btn-danger" type="submit" id="deleteUserButton">Account Löschen</button>
-                </div>
-            </form>
-        </div>
     </div>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     window.onload = () => {
+        // initialize bootstrap tooltips
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        });
+
         // Fetch all the forms we want to apply custom Bootstrap validation styles to
         let forms = document.querySelectorAll('.form-validation');
 
@@ -200,27 +380,31 @@
             });
     };
 
-    document.querySelector('#deleteUserButton').addEventListener('click', (e) => {
-        e.preventDefault();
-        swal({
-                title: "Bist du dir sicher?",
-                text: "Dies kann nicht rückgängig gemacht werden!",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonClass: "btn-danger",
-                confirmButtonText: "Ja, lösche meinen Account!",
-                cancelButtonText: "Abbrechen",
-                closeOnConfirm: true,
-                closeOnCancel: true
-            },
-            function (isConfirm) {
-                if (isConfirm) {
-                    axios.delete(`/api/user/<%= user.id %>/`).then(() => {
-                        window.location.href = '/login';
-                    });
-                }
-            });
-    });
+    <% if (!hasBorrowedBooks) {%>
+        // render delete function only when user
+        // has currently no borrowed books
+        document.querySelector('#deleteUserButton').addEventListener('click', (e) => {
+            e.preventDefault();
+            swal({
+                    title: "Bist du dir sicher?",
+                    text: "Dies kann nicht rückgängig gemacht werden!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-danger",
+                    confirmButtonText: "Ja, lösche meinen Account!",
+                    cancelButtonText: "Abbrechen",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        axios.delete(`http://localhost:4000/api/user/<%= user.id %>/`).then(() => {
+                            window.location.href = 'http://localhost:3000/login';
+                        });
+                    }
+                });
+        });
+    <% } %>
 
     function returnBook(e, element) {
         e.preventDefault();
@@ -239,7 +423,7 @@
             },
             function (isConfirm) {
                 if (isConfirm) {
-                    let userId = '<%= (typeof user === 'undefined' || false) ? null: user.id %>';
+                    let userId = '<%= (typeof user === 'undefined' || false) ? null : user.id %>';
 
                     axios.delete(`http://localhost:4000/api/book/return/${bookId}/`, {
                         data: {
