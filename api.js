@@ -8,7 +8,7 @@ const {Op} = require('sequelize');
 // Models
 let User = require('./models/user');
 let Book = require('./models/book');
-let BorrowedBook = require('./models/BorrowedBook');
+let BorrowedBook = require('./models/borrowedBook');
 
 // Relations
 User.hasMany(BorrowedBook, {onDelete: 'NO ACTION'});

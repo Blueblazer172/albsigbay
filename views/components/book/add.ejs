@@ -58,7 +58,7 @@
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label for="publicationDate" class="form-label">Jahr</label>
+                    <label for="publicationDate" class="form-label">Jahr / Auflage</label>
                     <input type="text" class="form-control" name="publicationDate" id="publicationDate" required>
                     <div class="invalid-feedback">
                         Bitte Jahr eingeben.
@@ -66,7 +66,7 @@
                 </div>
                 <div class="col-md-3">
                     <label for="pages" class="form-label">Seiten</label>
-                    <input type="text" class="form-control" name="pages" id="pages" pattern="\d+" required>
+                    <input type="number" class="form-control" name="pages" id="pages" pattern="\d+" required>
                     <div class="invalid-feedback">
                         Bitte Seiten eingeben.
                     </div>
@@ -99,6 +99,7 @@
         </form>
     </div>
 </main>
+<%- include('../../components/footer', {page: 'admin'}) %>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     window.onload = () => {
