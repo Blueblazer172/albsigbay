@@ -419,14 +419,14 @@ app.get('/books/cat/:category', (req, res, next) => {
         if (!books) {
             res.redirect('/');
         } else {
-            res.render('pages/index', {
-                books: books,
-                isAdmin: app.locals.isAdmin,
-                user: app.locals.user,
-                moment: moment,
-                categories: [
-                    {category: req.params.category}
-                ]
+            axios.get('http://localhost:4000/api/categories').then((categories) => {
+                res.render('pages/index', {
+                    books: books,
+                    isAdmin: app.locals.isAdmin,
+                    user: app.locals.user,
+                    moment: moment,
+                    categories: categories.data.data
+                });
             });
         }
     });
@@ -642,5 +642,5 @@ app.get('/impressum', (req, res, next) => {
 });
 
 app.listen(port, () => {
-    console.log(`App listening at http://localhost:${port}`)
+    console.log(`Website listening at http://localhost:${port}`)
 });

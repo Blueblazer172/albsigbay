@@ -4,6 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const port = 4000;
 const {Op} = require('sequelize');
+const morgan = require('morgan');
 
 // Models
 let User = require('./models/user');
@@ -17,6 +18,9 @@ Book.hasMany(BorrowedBook, {onDelete: 'NO ACTION'});
 // parse requests
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+// set morgan to log info about our requests for development use.
+app.use(morgan('dev'));
 
 // cors
 app.use((request, response, next) => {

@@ -5,7 +5,7 @@ let bcrypt = require('bcrypt');
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'db.sqlite',
-    // logging: false // @TODO needs to be commented in before release
+    logging: false // @TODO needs to be commented in before release
 });
 
 // setup User model and its fields.
@@ -78,10 +78,8 @@ User.prototype.generateHash = function (password) {
     return bcrypt.hash(password, bcrypt.genSaltSync());
 }
 
-// create all the defined tables in the specified database.
-sequelize.sync()
-    .then(() => console.log('users table has been successfully created, if one doesn\'t exist'))
-    .catch(error => console.log('This error occured', error));
+// create the defined table in the specified database.
+sequelize.sync().catch(error => console.log('This error occured', error));
 
 // export User model for use in other files.
 module.exports = User;

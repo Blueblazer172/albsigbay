@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'db.sqlite',
-    // logging: false // @TODO needs to be commented in before release
+    logging: false // @TODO needs to be commented in before release
 });
 
 // setup Book model and its fields.
@@ -47,10 +47,8 @@ let Book = sequelize.define('books', {
     }
 });
 
-// create all the defined tables in the specified database.
-sequelize.sync()
-    .then(() => console.log('book table has been successfully created, if one doesn\'t exist'))
-    .catch(error => console.log('This error occured', error));
+// create the defined table in the specified database.
+sequelize.sync().catch(error => console.log('This error occured', error));
 
 // export Book model for use in other files.
 module.exports = Book;
