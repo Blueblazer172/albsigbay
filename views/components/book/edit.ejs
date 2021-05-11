@@ -43,14 +43,13 @@
                     <input type="text" class="form-control" name="isbn" value="<%= book.isbn %>" id="isbn">
                 </div>
                 <div class="col-md-3">
-                    <label for="publicationDate" class="form-label">Jahr</label>
+                    <label for="publicationDate" class="form-label">Jahr / Auflage</label>
                     <input type="text" class="form-control" name="publicationDate" value="<%= book.publicationDate %>"
                            id="publicationDate">
                 </div>
                 <div class="col-md-3">
                     <label for="pages" class="form-label">Seiten</label>
-                    <input type="text" class="form-control" name="pages" value="<%= book.pages %>" id="pages"
-                           pattern="\d+">
+                    <input type="number" class="form-control" name="pages" value="<%= book.pages %>" id="pages" pattern="\d+">
                 </div>
             </div>
             <div class="row mt-3">
@@ -74,6 +73,7 @@
         </form>
     </div>
 </main>
+<%- include('../../components/footer', {page: 'admin'}) %>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     window.onload = () => {

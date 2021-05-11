@@ -17,7 +17,7 @@ const jwt = require('./jwt');
 // Models
 let User = require('./models/user');
 let Book = require('./models/book');
-let BorrowedBook = require('./models/BorrowedBook');
+let BorrowedBook = require('./models/borrowedBook');
 
 // Relations
 User.hasMany(BorrowedBook, {onDelete: 'NO ACTION'});
@@ -361,6 +361,32 @@ app.get('/search/:query', (req, res, next) => {
     }
 });
 
+app.get('/admin/search/:query', (req, res, next) => {
+    // unescape url query parameter
+    req.params.query = querystring.unescape(req.params.query);
+    if (req.params.query) {
+        axios.put('http://localhost:4000/api/search', {
+            search: req.params.query
+        }).then((filteredBooks) => {
+            if (filteredBooks.data.data.length > 0) {
+                axios.get('http://localhost:4000/api/categories').then((categories) => {
+                    res.render('pages/admin', {
+                        books: filteredBooks.data.data,
+                        categories: categories.data.data,
+                        isAdmin: app.locals.isAdmin,
+                        user: app.locals.user,
+                        moment: moment
+                    });
+                });
+            } else {
+                res.render('pages/admin');
+            }
+        });
+    } else {
+        res.redirect('/');
+    }
+});
+
 app.get('/book/:id', (req, res, next) => {
     Book.findOne({
         where: {id: req.params.id},
@@ -594,6 +620,11 @@ app.get('/search', (req, res, next) => {
     res.redirect('/');
 });
 
+
+app.get('/admin/search', (req, res, next) => {
+    res.redirect('/admin');
+});
+
 app.get('/about', (req, res, next) => {
     res.render('pages/about');
 });
@@ -602,8 +633,12 @@ app.get('/faq', (req, res, next) => {
     res.render('pages/faq');
 });
 
-app.get('/gdpr', (req, res, next) => {
+app.get('/datenschutz', (req, res, next) => {
     res.render('pages/gdpr');
+});
+
+app.get('/impressum', (req, res, next) => {
+    res.render('pages/impressum');
 });
 
 app.listen(port, () => {
