@@ -433,8 +433,12 @@ app.get('/books/cat/:category', (req, res, next) => {
 });
 
 app.route('/books/add')
-    .get((req, res) => {
-        res.render('components/book/add');
+    .get(tokenChecker, (req, res) => {
+        axios.get('http://localhost:4000/api/categories').then((categories) => {
+            res.render('components/book/add', {
+                categories: categories.data.data
+            });
+        });
     })
     .post(upload.single('cover'), (req, res, next) => {
         const file = req.file;
@@ -468,7 +472,12 @@ app.get('/book/edit/:id', (req, res, next) => {
         if (!book) {
             res.redirect('/');
         } else {
-            res.render('components/book/edit', {book: book.dataValues});
+            axios.get('http://localhost:4000/api/categories').then((categories) => {
+                res.render('components/book/edit', {
+                    categories: categories.data.data,
+                    book: book.dataValues
+                });
+            });
         }
     });
 });

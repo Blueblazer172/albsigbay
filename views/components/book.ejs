@@ -15,7 +15,7 @@
 <main class="container">
     <div class="row mt-4 mb-3">
         <div class="col col-sm-12">
-            <a href="/" style="text-decoration: none">
+            <a id="goBack" style="text-decoration: none; cursor: pointer">
                 <i class="fa fa-arrow-left fa-2x" aria-hidden="true"><span style="font-family: Arial">&nbsp;Zurück</span></i>
             </a>
         </div>
@@ -59,6 +59,10 @@
         // bootstrap tooltips
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
+        });
+
+        document.getElementById('goBack').addEventListener('click', () => {
+            history.back();
         });
     }
 

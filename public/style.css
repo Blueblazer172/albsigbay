@@ -9,7 +9,7 @@
     box-shadow: none !important;
 }
 
-body{
+body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -17,4 +17,11 @@ body{
 
 main {
     flex: 1 0 auto;
+}
+
+.row-eq-height {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
 }
