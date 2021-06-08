@@ -42,10 +42,23 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <label for="category" class="form-label">Kategorie</label>
-                    <input type="text" class="form-control" name="category" id="category" required>
-                    <div class="invalid-feedback">
-                        Bitte Kategorie eingeben.
+                    <label for="author" class="form-label">Kategorie</label>
+                    <div class="input-group mb-3">
+                        <input id="newCategory" type="text" class="form-control" aria-label="Text input with dropdown button">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">Wählen...
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <% if (typeof categories !== 'undefined') { %>
+                                <% categories.forEach(function(category) { %>
+                                    <li>
+                                        <a class="dropdown-item" onclick="categories(this)">
+                                            <%= category.category.toUpperCase() %>
+                                        </a>
+                                    </li>
+                                <% }) %>
+                            <% } %>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -118,6 +131,10 @@
                     form.classList.add('was-validated')
                 }, false)
             })
+    }
+
+    function categories(el) {
+        document.getElementById('newCategory').value = el.innerText.toUpperCase()
     }
 </script>
 </body>
