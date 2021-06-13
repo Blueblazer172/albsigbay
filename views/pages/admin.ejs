@@ -13,7 +13,7 @@
 <%- include('../components/nav', {page: 'admin'}) %>
 <main class="container mb-5">
     <div class="mt-4">
-        <h1>Guten Tag Admin!,&nbsp;<%= user.username %></h1>
+        <h1>Guten Tag <%= user.username %>!</h1>
         <div class="row align-items-end mt-5">
             <div class="col-3">
                 <div class="display-3">Verwaltung</div>
@@ -40,9 +40,7 @@
                     <div class="col-lg-6 col-sm-12 card mb-3">
                         <div class="row mt-3 mb-3">
                             <div class="col-2 mr-3 col-xs-12">
-                                <a href="/book/<%= book.id %>">
-                                    <img src="/public/books/covers/<%= book.cover %>" width="100px" height="auto" alt="<%= book.title %>">
-                                </a>
+                                <img src="/public/books/covers/<%= book.cover %>" width="100px" height="auto" alt="<%= book.title %>">
                             </div>
                             <div class="col-9 col-xs-12 ms-1 me-0 ps-5 pe-0">
                                 <div class="card-block px-2">
