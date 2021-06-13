@@ -315,6 +315,34 @@ app.delete('/api/book/return/:bookId', (req, res, next) => {
     }
 });
 
+app.post('/api/book/delete/:bookId', (req, res, next) => {
+    if (req.body.userId) {
+        Book.destroy({where: {id: req.params.bookId}}).then(() => {
+            res.json({
+                'message': 'success',
+                'data': {
+                    userId: req.body.userId
+                }
+            });
+        }).catch((error) => {
+            console.log(error)
+            res.json({
+                'message': 'failure',
+                'data': {
+                    message: error.message
+                }
+            });
+        });
+    } else {
+        res.json({
+            'message': 'failure',
+            'data': {
+                message: 'You are not admin!'
+            }
+        });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Api listening at http://localhost:${port}`)
 });

@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="/public/favicon.png"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.css">
     <link rel="stylesheet" type="text/css" href="/public/style.css"/>
 </head>
 <body>
@@ -84,6 +85,9 @@
             </div>
             <div class="row mt-3 justify-content-end">
                 <div class="col-auto mt-4">
+                    <button class="btn btn-danger" data-book-id="<%= book.id %>" onclick="deleteBook(event, this)">Löschen</button>
+                </div>
+                <div class="col-auto mt-4">
                     <button class="btn btn-primary" type="submit">Aktualisieren</button>
                 </div>
             </div>
@@ -91,6 +95,9 @@
     </div>
 </main>
 <%- include('../../components/footer', {page: 'admin'}) %>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-sweetalert@1.0.1/dist/sweetalert.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     window.onload = () => {
@@ -108,6 +115,35 @@
 
                     form.classList.add('was-validated')
                 }, false)
+            });
+    }
+
+    function deleteBook(e, element) {
+        e.preventDefault();
+        let bookId = element.getAttribute('data-book-id');
+
+        swal({
+                title: "Möchtest du das Buch löschen ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-warning",
+                confirmButtonText: "Ja, Buch löschen!",
+                cancelButtonText: "Abbrechen",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+            function (isConfirm) {
+                if (isConfirm) {
+                    axios.post(`http://localhost:4000/api/book/delete/${bookId}/`, {
+                        userId: '<%= (typeof user === 'undefined' || user === null) ? null : user.id %>'
+                    }).then((res) => {
+                        if (res.data.message === 'failure') {
+                            window.location.href = '/login';
+                        } else {
+                            window.location.href = `/profile/${res.data.data.userId}`;
+                        }
+                    });
+                }
             });
     }
 

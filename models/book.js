@@ -45,6 +45,8 @@ let Book = sequelize.define('books', {
         type: Sequelize.STRING,
         allowNull: false
     }
+},{
+    paranoid: true
 });
 
 // create the defined table in the specified database.
