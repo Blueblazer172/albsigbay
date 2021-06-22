@@ -80,6 +80,21 @@ app.get('/api/books', (req, res, next) => {
     });
 });
 
+app.post('/api/book', (req, res, next) => {
+    Book.findOne({
+        where: {id: req.body.bookId},
+        include: {
+            model: BorrowedBook,
+            required: false,
+        }
+    }).then((book) => {
+        res.json({
+            'message': 'success',
+            'data': book
+        })
+    });
+});
+
 app.get('/api/categories', (req, res, next) => {
     Book.findAll().then(() => {
         Book.aggregate('category', 'DISTINCT', {plain: false}).then((categories) => {
