@@ -388,18 +388,14 @@ app.get('/admin/search/:query', (req, res, next) => {
 });
 
 app.get('/book/:id', (req, res, next) => {
-    Book.findOne({
-        where: {id: req.params.id},
-        include: {
-            model: BorrowedBook,
-            required: false,
-        }
+    axios.post('http://localhost:4000/api/book',{
+        bookId: req.params.id
     }).then((book) => {
-        if (!book) {
+        if (!book.data.data) {
             res.redirect('/');
         } else {
             res.render('components/book', {
-                book: book,
+                book: book.data.data,
                 isAdmin: app.locals.isAdmin,
                 user: app.locals.user,
                 moment: moment
