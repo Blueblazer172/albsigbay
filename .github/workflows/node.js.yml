@@ -23,6 +23,7 @@ jobs:
     - name: npm install and test
       run: |
         npm ci
+        node server.js && node api.js
         npm test
       env:
         CI: true
