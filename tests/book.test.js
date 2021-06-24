@@ -1,4 +1,3 @@
-
 const book = require('./book');
 const user = require('./user')
 
@@ -9,7 +8,6 @@ test('check book 1 exists', () => {
 
     });
 });
-
 
 test('check if a user with firstname has borrowed book with id 1', () => {
     // user firstname with userId 1 is max
