@@ -1,5 +1,12 @@
 const user = require('./user');
 
+test('check if user exists', () => {
+    // user firstname with userId 1 is max
+    return user.fetchUser(1).then(data => {
+        expect(data.data.data).not.toEqual(null);
+    });
+});
+
 test('check user 1 is firstname max', () => {
     // user firstname with userId 1 is max
     return user.fetchUser(1).then(data => {
