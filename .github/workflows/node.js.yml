@@ -42,9 +42,7 @@ jobs:
           script: |
             cd ~/albsigbay
             git pull origin continuous-integration
-            npm install --production
+            npm ci
             pm2 logs
             pm2 restart albsigbay-server
             pm2 restart albsigbay-api
-        env:
-            CI: true
