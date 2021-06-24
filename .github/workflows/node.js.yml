@@ -43,6 +43,5 @@ jobs:
             cd ~/albsigbay
             git pull origin continuous-integration
             npm ci
-            pm2 logs
             pm2 restart albsigbay-server
             pm2 restart albsigbay-api
