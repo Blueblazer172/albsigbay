@@ -13,7 +13,7 @@ const args = require('minimist')(process.argv.slice(2));
 const port = 3000;
 
 if (typeof args.domain !== "undefined") {
-    app.locals.domain = args.domain;
+    app.locals.domain = '/';
 } else {
     app.locals.domain = 'http://localhost:3000';
 }

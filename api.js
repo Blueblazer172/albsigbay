@@ -8,7 +8,7 @@ const morgan = require('morgan');
 const args = require('minimist')(process.argv.slice(2));
 
 if (typeof args.domain !== "undefined") {
-    app.locals.domain = args.domain;
+    app.locals.domain = '/';
 } else {
     app.locals.domain = 'http://localhost:4000';
 }
