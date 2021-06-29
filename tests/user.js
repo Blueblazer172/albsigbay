@@ -9,7 +9,7 @@ const user = {
     },
 
     fetchUser: (userId) => {
-        return axios.get('${app.locals.domain}/api/user/' + userId);
+        return axios.get(`${app.locals.domain}/api/user/` + userId);
     }
 }
 
