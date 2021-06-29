@@ -399,8 +399,8 @@
                 },
                 function (isConfirm) {
                     if (isConfirm) {
-                        axios.delete(`http://localhost:4000/api/user/<%= user.id %>/`).then(() => {
-                            window.location.href = 'http://localhost:3000/login';
+                        axios.delete(`${app.locals.domain}/api/user/<%= user.id %>/`).then(() => {
+                            window.location.href = `${app.locals.domain}/login`;
                         });
                     }
                 });
@@ -426,7 +426,7 @@
                 if (isConfirm) {
                     let userId = '<%= (typeof user === 'undefined' || false) ? null : user.id %>';
 
-                    axios.delete(`http://localhost:4000/api/book/return/${bookId}/`, {
+                    axios.delete(`${app.locals.domain}/api/book/return/${bookId}/`, {
                         data: {
                             userId: userId
                         }

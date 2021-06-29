@@ -123,7 +123,7 @@
         // debounce input search
         const bookSearch = _.debounce(function () {
             let searchQuery = document.querySelector('#search').value;
-            let searchUrl = 'http://localhost:3000/search/' + encodeURIComponent(searchQuery);
+            let searchUrl = `${app.locals.domain}/search/` + encodeURIComponent(searchQuery);
             window.location.replace(searchUrl);
         }, 500);
 
@@ -146,7 +146,7 @@
             },
             function (isConfirm) {
                 if (isConfirm) {
-                    axios.post(`http://localhost:4000/api/book/borrow/${bookId}/`, {
+                    axios.post(`${app.locals.domain}/api/book/borrow/${bookId}/`, {
                         userId: '<%= (typeof user === 'undefined' || user === null) ? null : user.id %>'
                     }).then((res) => {
                         if (res.data.message === 'failure') {

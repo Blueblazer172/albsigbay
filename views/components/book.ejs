@@ -82,7 +82,7 @@
             },
             function (isConfirm) {
                 if (isConfirm) {
-                    axios.post(`http://localhost:4000/api/book/borrow/${bookId}/`, {
+                    axios.post(${app.locals.domain}${app.locals.domain}/api/book/borrow/${bookId}/`, {
                         userId: '<%= (typeof user === 'undefined' || user === null) ? null : user.id %>'
                     }).then((res) => {
                         if (res.data.message === 'failure') {

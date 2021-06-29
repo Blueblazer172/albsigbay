@@ -92,7 +92,7 @@
         // debounce input search
         const bookSearch = _.debounce(function () {
             let searchQuery = document.querySelector('#search').value;
-            let searchUrl = 'http://localhost:3000/admin/search/' + encodeURIComponent(searchQuery);
+            let searchUrl = `${app.locals.domain}/admin/search/` + encodeURIComponent(searchQuery);
             window.location.replace(searchUrl);
         }, 500);
 
