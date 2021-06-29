@@ -9,14 +9,7 @@ const {Op} = require('sequelize');
 const morgan = require('morgan');
 const multer = require('multer');
 const moment = require('moment');
-const args = require('minimist')(process.argv.slice(2));
 const port = 3000;
-
-if (typeof args.domain !== "undefined") {
-    app.locals.domain = '/';
-} else {
-    app.locals.domain = 'http://localhost:3000';
-}
 
 // import jwt auth file
 const jwt = require('./jwt');
@@ -136,8 +129,8 @@ let tokenChecker = (req, res, next) => {
 
 // index page
 app.get('/', tokenChecker, (req, res, next) => {
-    const getBooks = axios.get(`${app.locals.domain}/api/books`);
-    const getCategories = axios.get(`${app.locals.domain}/api/categories`);
+    const getBooks = axios.get('http://localhost:4000/api/books');
+    const getCategories = axios.get('http://localhost:4000/api/categories');
 
     axios.all([getBooks, getCategories]).then(axios.spread((...responses) => {
         const books = responses[0];
@@ -298,9 +291,9 @@ app.get('/profile/:id', tokenChecker, (req, res) => {
     if (!app.locals.user || (app.locals.user && (parseInt(app.locals.user.id) !== parseInt(req.params.id)))) {
         res.redirect('/');
     } else {
-        const getUser = axios.get(`${app.locals.domain}/api/user/${req.params.id}`);
-        const getBorrowedBooks = axios.get(`${app.locals.domain}/api/user/${req.params.id}/books`);
-        const getBorrowedBooksHistory = axios.get(`${app.locals.domain}/api/user/${req.params.id}/books/history`);
+        const getUser = axios.get(`http://localhost:4000/api/user/${req.params.id}`);
+        const getBorrowedBooks = axios.get(`http://localhost:4000/api/user/${req.params.id}/books`);
+        const getBorrowedBooksHistory = axios.get(`http://localhost:4000/api/user/${req.params.id}/books/history`);
 
         axios.all([getUser, getBorrowedBooks, getBorrowedBooksHistory]).then(axios.spread((...responses) => {
             const user = responses[0];
@@ -329,7 +322,7 @@ app.get('/admin', tokenChecker, (req, res, next) => {
     if (!app.locals.isAdmin) {
         res.redirect('/');
     } else {
-        axios.get(`${app.locals.domain}/api/books`).then((books) => {
+        axios.get('http://localhost:4000/api/books').then((books) => {
             res.render('pages/admin', {books: books.data.data});
         });
     }
@@ -346,11 +339,11 @@ app.get('/search/:query', (req, res, next) => {
     // unescape url query parameter
     req.params.query = querystring.unescape(req.params.query);
     if (req.params.query) {
-        axios.put(`${app.locals.domain}/api/search`, {
+        axios.put('http://localhost:4000/api/search', {
             search: req.params.query
         }).then((filteredBooks) => {
             if (filteredBooks.data.data.length > 0) {
-                axios.get(`${app.locals.domain}/api/categories`).then((categories) => {
+                axios.get('http://localhost:4000/api/categories').then((categories) => {
                     res.render('pages/index', {
                         books: filteredBooks.data.data,
                         categories: categories.data.data,
@@ -372,11 +365,11 @@ app.get('/admin/search/:query', (req, res, next) => {
     // unescape url query parameter
     req.params.query = querystring.unescape(req.params.query);
     if (req.params.query) {
-        axios.put(`${app.locals.domain}/api/search`, {
+        axios.put('http://localhost:4000/api/search', {
             search: req.params.query
         }).then((filteredBooks) => {
             if (filteredBooks.data.data.length > 0) {
-                axios.get(`${app.locals.domain}/api/categories`).then((categories) => {
+                axios.get('http://localhost:4000/api/categories').then((categories) => {
                     res.render('pages/admin', {
                         books: filteredBooks.data.data,
                         categories: categories.data.data,
@@ -395,7 +388,7 @@ app.get('/admin/search/:query', (req, res, next) => {
 });
 
 app.get('/book/:id', (req, res, next) => {
-    axios.post(`${app.locals.domain}/api/book`,{
+    axios.post('http://localhost:4000/api/book',{
         bookId: req.params.id
     }).then((book) => {
         if (!book.data.data) {
@@ -422,7 +415,7 @@ app.get('/books/cat/:category', (req, res, next) => {
         if (!books) {
             res.redirect('/');
         } else {
-            axios.get(`${app.locals.domain}/api/categories`).then((categories) => {
+            axios.get('http://localhost:4000/api/categories').then((categories) => {
                 res.render('pages/index', {
                     books: books,
                     isAdmin: app.locals.isAdmin,
@@ -437,7 +430,7 @@ app.get('/books/cat/:category', (req, res, next) => {
 
 app.route('/books/add')
     .get(tokenChecker, (req, res) => {
-        axios.get(`${app.locals.domain}/api/categories`).then((categories) => {
+        axios.get('http://localhost:4000/api/categories').then((categories) => {
             res.render('components/book/add', {
                 categories: categories.data.data
             });
@@ -475,7 +468,7 @@ app.get('/book/edit/:id', (req, res, next) => {
         if (!book) {
             res.redirect('/');
         } else {
-            axios.get(`${app.locals.domain}/api/categories`).then((categories) => {
+            axios.get('http://localhost:4000/api/categories').then((categories) => {
                 res.render('components/book/edit', {
                     categories: categories.data.data,
                     book: book.dataValues
@@ -654,5 +647,5 @@ app.get('/impressum', (req, res, next) => {
 });
 
 app.listen(port, () => {
-    console.log(`Website listening at ${app.locals.domain}`)
+    console.log(`Website listening at http://localhost:${port}`)
 });

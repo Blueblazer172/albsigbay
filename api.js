@@ -5,13 +5,6 @@ const bodyParser = require('body-parser');
 const port = 4000;
 const {Op} = require('sequelize');
 const morgan = require('morgan');
-const args = require('minimist')(process.argv.slice(2));
-
-if (typeof args.domain !== "undefined") {
-    app.locals.domain = '/';
-} else {
-    app.locals.domain = 'http://localhost:4000';
-}
 
 // Models
 let User = require('./models/user');
@@ -270,7 +263,7 @@ app.delete('/api/user/:id', (req, res, next) => {
     if (req.params.id !== '') {
         // soft delete user
         User.destroy({where: {id: req.params.id}}).then(() => {
-            res.redirect(303, `${app.locals.domain}/logout`);
+            res.redirect(303, 'http://localhost:3000/logout');
         });
     } else {
         res.redirect('/');
@@ -366,5 +359,5 @@ app.post('/api/book/delete/:bookId', (req, res, next) => {
 });
 
 app.listen(port, () => {
-    console.log(`Api listening at ${app.locals.domain}`)
+    console.log(`Api listening at http://localhost:${port}`)
 });
