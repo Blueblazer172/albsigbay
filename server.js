@@ -646,9 +646,9 @@ app.get('/impressum', (req, res, next) => {
     res.render('pages/impressum');
 });
 
-app.get('/ci', (req, res, next) => {
-    res.render('pages/ci');
-});
+// app.get('/ci', (req, res, next) => {
+//     res.render('pages/ci');
+// });
 
 app.listen(port, () => {
     console.log(`Website listening at http://localhost:${port}`)
