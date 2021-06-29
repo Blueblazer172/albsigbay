@@ -43,5 +43,5 @@ jobs:
             cd ~/albsigbay
             git pull origin continuous-integration
             npm ci
-            pm2 restart albsigbay-server --node-args="--domain=${{ secrets.DOMAIN_NAME }}"
-            pm2 restart albsigbay-api --node-args="--domain=${{ secrets.DOMAIN_NAME }}"
+            pm2 restart albsigbay-server
+            pm2 restart albsigbay-api
