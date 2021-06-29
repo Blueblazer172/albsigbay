@@ -9,7 +9,7 @@ const user = {
     },
 
     fetchUser: (userId) => {
-        return axios.get(`http://localhost:4000/api/user/` + userId);
+        return axios.get('http://localhost:4000/api/user/' + userId);
     }
 }
 
